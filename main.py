@@ -7,7 +7,8 @@ melbourne_file_path = r'C:\Users\ron.l\Desktop\ML\Kaggel\house price data/melb_d
 # read the data and store data in DataFrame titled melbourne_data
 melbourne_data = pd.read_csv(melbourne_file_path)
 # print a summary of the data in Melbourne data
-print(melbourne_data.describe())
+desc = melbourne_data.describe()
+desc = desc.reset_index()
 
 '''clean'''
 melbourne_data = melbourne_data.dropna(axis=0)
