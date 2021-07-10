@@ -1,80 +1,47 @@
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
-from scipy import sparse
-import sklearn.datasets as ds
-
-class prediction_models(object):
-    def __init__(self, X, y, new_xs):
-        self.X = X
-        self.y = y
-        self.new_xs = new_xs
-
-    def knn_classifier(self, k_neighbors):
-        neigh = KNeighborsClassifier(n_neighbors=k_neighbors)
-        neigh.fit(X, y)
-        KNeighborsClassifier(...)
-        for new_x in new_xs:
-            print('new_x: ', new_x)
-            print('prediction:', neigh.predict([[new_x]]))
-            print('probability: ', neigh.predict_proba([[new_x]]))
-
-    def knn_regressor(self, k_neighbors):
-        neigh = KNeighborsRegressor(n_neighbors=k_neighbors, weights='distance')
-        neigh.fit(X, y)
-        KNeighborsClassifier(...)
-        for new_x in new_xs:
-            print('new_x: ', new_x)
-            print('prediction:', neigh.predict([[new_x]]))
+import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':
+    print("\n ***** KNN with the Iris flower data exercises ***** ")
+    ''' read the data '''
+    X, y = load_iris(return_X_y=True)
+    df = pd.DataFrame(X)
+    df['y'] = y.tolist()
+    ''' describe the data '''
+    print("\ninfo:", df.info())
+    print("\ndescribe:\n", df.describe())
+    print("\nvalue_counts:\n", df['y'].value_counts())
+    '''describe by label of y'''
+    for label in np.unique(df['y']):
+        print(f"\nDescribe X when y = {label}\n", df[df['y'] == label].describe())
+    '''split the data'''
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    '''evaluate different K options'''
+    k_neighbors_options = list(range(3, 8))
+    train_accuracy = []
+    test_accuracy = []
+    for k in k_neighbors_options:
+        '''create a model'''
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(X, y)
+        y_pred = knn.predict(X_test)
+        '''Compute accuracy on the training set'''
+        train_accuracy.append(knn.score(X_train, y_train))
+        '''Compute accuracy on the testing set'''
+        test_accuracy.append(knn.score(X_test, y_test))
 
-    X = [[0], [1], [2], [3], [7], [7]]
-    y = [0, 0, 1, 1, 1, 1]
-    new_xs = [1.6]
-    k_neighbors = 2
-
-    knn_model = prediction_models(X, y, new_xs)
-    print("\nknn_classifier - ")
-    knn_model.knn_classifier(k_neighbors)
-    print("\nknn_regressor - ")
-    knn_model.knn_regressor(k_neighbors)
-
-    print("\n\n\n ***** The Iris flower data exercises ***** ")
-    '''if working with the data as np array : '''
-    iris = ds.load_iris()
-    # research the data
-    '''if working with the data as np array : '''
-    print("\niris.keys: ", iris.keys())
-    X, y = iris.data, iris.target
-    print("\nX shape: ", X.shape)
-    print("X mean: ", X.mean(axis=0))
-    print("X min: ", X.min(axis=0))
-    print("X max: ", X.max(axis=0))
-
-    print("\ny shape: ", y.shape)
-    print("y mean: ", y.mean(axis=0))
-    print("y min: ", y.min(axis=0))
-    print("y max: ", y.max(axis=0), "\n")
-
-    '''if working with the data as dataframe : '''
-    # filename = iris.filename
-    # iris_0 = pd.read_csv(filename)
-    iris_data = pd.DataFrame(X)
-    iris_data['y'] = y.tolist()
-    print("\ninfo:", iris_data.info())
-    print("\ndescribe:\n", iris_data.describe())
-    print("\nvalue_counts:\n", iris_data['y'].value_counts())
-    # 2-D array with ones on the diagonal and zeros elsewhere
-    # matrix = np.zeros((3, 3))
-    # diag_of_ones = np.ones((1, 3))
-    # matrix[np.diag_indices(3, ndim=2)] = diag_of_ones
-    eye = np.eye(4)
-    # convert the NumPy array to a SciPy sparse matrix in CSR format.
-    sparse_matrix = sparse.csr_matrix(eye)
-
-
-    print("DAMN!")
-
+    '''Visualization of k values vs accuracy'''
+    plt.title('k-NN: Varying Number of Neighbors')
+    plt.plot(k_neighbors_options, test_accuracy, label='Testing Accuracy')
+    plt.plot(k_neighbors_options, train_accuracy, label='Training Accuracy')
+    plt.legend()
+    plt.xlabel('Number of Neighbors')
+    plt.ylabel('Accuracy')
+    plt.show()
+    # plt.close()

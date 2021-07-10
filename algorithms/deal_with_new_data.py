@@ -51,19 +51,5 @@ def bar_count_plot_for_1_feature(df, col, title):
     ax = plt.subplots(1, 1, figsize=(10, 8))
     sns.countplot(f'{col}', data=df)
     plt.title(f"{title}")
+    plt.show()
     return plt
-
-
-def save_and_show_plots(plt, path_out, file_name, show=True, save=True):
-    if show:
-        plt.show()
-    if save:
-        plt.savefig(f"{path_out}\\{file_name}.png")
-        plt.close()
-
-
-df = read_time_series_data(path_in=r'C:\Users\ron.l\Desktop\ML\Kaggel\house price data\melb_data.csv')
-# plt = corr(df, feature1='Price', feature2='Landsize', color="red", kind="reg")
-save_and_show_plots(plt, path_out=r'C:\Users\ron.l\Desktop\try', file_name='try', show=True, save=False)
-
-print("DAMN!")
