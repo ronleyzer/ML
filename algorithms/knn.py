@@ -21,16 +21,16 @@ if __name__ == '__main__':
     for label in np.unique(df['y']):
         print(f"\nDescribe X when y = {label}\n", df[df['y'] == label].describe())
     '''split the data'''
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     '''evaluate different K options'''
-    k_neighbors_options = list(range(3, 8))
+    k_neighbors_options = list(range(1, 9))
     train_accuracy = []
     test_accuracy = []
     for k in k_neighbors_options:
         '''create a model'''
         knn = KNeighborsClassifier(n_neighbors=k)
-        knn.fit(X, y)
-        y_pred = knn.predict(X_test)
+        knn.fit(X_train, y_train)
+        # y_pred = knn.predict(X_test)
         '''Compute accuracy on the training set'''
         train_accuracy.append(knn.score(X_train, y_train))
         '''Compute accuracy on the testing set'''
@@ -44,4 +44,4 @@ if __name__ == '__main__':
     plt.xlabel('Number of Neighbors')
     plt.ylabel('Accuracy')
     plt.show()
-    # plt.close()
+    plt.close()
