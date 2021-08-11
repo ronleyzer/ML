@@ -6,6 +6,7 @@ from sklearn.model_selection import KFold
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
 
 if __name__ == '__main__':
     print("\n ***** KFold with the Iris flower data exercises ***** ")
@@ -27,4 +28,18 @@ if __name__ == '__main__':
         print(f"Accuracy for the fold no. {i} on the test set: {accuracy_score(y_test, model.predict(X_test))}")
         i += 1
 
-    print("DAMN!")
+        '''split the data RepeatedKFold vs RepeatedStratifiedKFold'''
+        X = np.array([[1, 2], [3, 4], [1, 2], [3, 4], [5, 6]])
+        random_state = 12883823
+        rkf = RepeatedKFold(n_splits=2, n_repeats=2, random_state=random_state)
+        print("RepeatedKFold:")
+        for train, test in rkf.split(X):
+            print("%s %s" % (train, test))
+
+        X = np.array([[1, 2], [3, 4], [1, 2], [3, 4], [5, 6]])
+        y = np.array([0, 0, 1, 1, 1])
+        random_state = 12883823
+        rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=2, random_state=random_state)
+        print("RepeatedStratifiedKFold:")
+        for train2, test2 in rskf.split(X, y):
+            print("%s %s" % (train2, test2))
