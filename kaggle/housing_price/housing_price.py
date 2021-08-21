@@ -76,7 +76,7 @@ for col in df.loc[:, df.dtypes != np.object]:
     plt.close()
 
 '''transformed object to '''
-'''split to train, dev(validation) and test '''
+'''split to train, dev(validation) and test  '''
 X = df.iloc[:, :-1]
 y = df['SalePrice']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
