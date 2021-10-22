@@ -22,6 +22,13 @@ def explore_data_value_counts_for_all_features(df):
         print(f"\n{col}\n", df[col].value_counts())
 
 
+def describe_nan(df):
+    missing_values_count = df.isnull().sum(0).sort_values(ascending=False)
+    missing_rows = df.shape[0] - df.dropna().shape[0]
+    percent_missing_rows = missing_rows / df.shape[0]
+    return missing_values_count, missing_rows, percent_missing_rows
+
+
 ''' drop '''
 
 
