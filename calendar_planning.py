@@ -13,7 +13,7 @@ import calendar
 # yio = int(input('Input a month'))
 # s = int(input('Input a year'))
 # print(calendar.month(s, yio))
-
+import webbrowser
 from tkcalendar import Calendar
 from datetime import datetime
 
@@ -143,6 +143,15 @@ class Agenda(Calendar):
             label.configure(text=text)
 
 
+class Html:
+    def __init__(self, save_path: str):
+        self.save_path = save_path
+
+    def open_html(self):
+        f = open(f'{self.save_path}', 'w')
+        return f
+
+
 if __name__ == '__main__':
     import tkinter as tk
 
@@ -150,13 +159,13 @@ if __name__ == '__main__':
     root.geometry("800x500")
     agenda = Agenda(root, selectmode='none')
     topics = {
-                'NN- AF, Backprobagation,': [],
-                'soft/argMAX, AdaBoot': [],
-                'Ensemble models': [],
+                'NN- AF, Backpropagation,': [],
+                'soft/argmax, AdaBoost': [],
+                'Ensemble models': [], # Gradient Boosting, XG Boost(Xtreme Gradient Boosting)
                 'NN-multilayer perceptron': [],
                 'SVM': [],
 
-                'NN- autoencoder': [],
+                'NN-autoencoder': [],
                 'P-AUC,Rock': [], # Performance
                 'P-micro/macro avg': [],
                 'PR-Frequentist Vs Bayesian': [], # Pattern recognition
@@ -185,14 +194,10 @@ if __name__ == '__main__':
                 'KL Divergence': ['https://towardsdatascience.com/light-on-math-machine-learning-intuitive-guide-to-understanding-kl-divergence-2b382ca2b2a8'],
                 'negative sampling': [],
                 '': [],
-
-
-
               }
 
     date = agenda.datetime.strptime('2021-10-21  1:33PM', '%Y-%m-%d %I:%M%p')
     # date = agenda.datetime.today() + agenda.timedelta(days=2)
-
     days = 0
     today_date = agenda.datetime.today()
 
@@ -208,34 +213,7 @@ if __name__ == '__main__':
         else:
             agenda.calevent_create(date + agenda.timedelta(days=days), topic, color)
 
-
-        # agenda.calevent_create(date + agenda.timedelta(days=-1), 'soft/argMAX', 'message')
-        # agenda.calevent_create(date, 'AdaBoot, GradBooting', 'message')
-        # agenda.calevent_create(date, '', 'message')
-        # agenda.calevent_create(date + agenda.timedelta(days=1), 'NN-multilayer perceptron', 'reminder')
-        # agenda.calevent_create(date + agenda.timedelta(days=2), 'SVM', 'reminder')
-        # agenda.calevent_create(date + agenda.timedelta(days=4), 'NN- autoencoder', 'reminder')
-
-    # agenda.calevent_create(date + agenda.timedelta(days=-1), 'NN- AF, Backpro,', 'message')
-    # agenda.calevent_create(date + agenda.timedelta(days=-1), 'soft/argMAX', 'message')
-    # agenda.calevent_create(date, 'AdaBoot, GradBooting', 'message')
-    # agenda.calevent_create(date, '', 'message')
-    # agenda.calevent_create(date + agenda.timedelta(days=1), 'NN-multilayer perceptron', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=2), 'SVM', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=4), 'NN- autoencoder', 'reminder')
-
-    # date = agenda.datetime.strptime('2021-10-30  1:33PM', '%Y-%m-%d %I:%M%p')
-    # agenda.calevent_create(date + agenda.timedelta(days=-1), 'Performance(RF)', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=-1), 'AUC, Rock..', 'reminder')
-    # agenda.calevent_create(date, 'PR-Frequentist vs Bayesian', 'reminder')
-    # agenda.calevent_create(date, 'LDA, hidden-markov', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=1), 'PR-Kalman filter', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=2), 'PR-Monte Carlo', 'reminder')
-    # agenda.calevent_create(date + agenda.timedelta(days=4), 'TS-Arima', 'reminder')
-
     agenda.tag_config('reminder', background='red', foreground='white')
 
     agenda.pack(fill="both", expand=True)
     root.mainloop()
-
-print('HY?')
