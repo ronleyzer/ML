@@ -6,13 +6,17 @@ from sklearn.mixture import GaussianMixture as GMM
 from matplotlib.patches import Ellipse
 import pandas as pd
 from sklearn import metrics
+from sklearn import datasets
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler, normalize
 
 
 def generate_data():
     # Generate some data
-    X, y_true = make_blobs(n_samples=400, centers=4,
-                           cluster_std=0.60, random_state=0)
-    X = X[:, ::-1]  # flip axes for better plotting
+    # X, y_true = make_blobs(n_samples=400, centers=4,
+    #                        cluster_std=0.60, random_state=0)
+    # X = X[:, ::-1]  # flip axes for better plotting
+    X, y = datasets.load_iris(return_X_y=True)
     return X
 
 
@@ -86,10 +90,33 @@ def silhouette_scores(X, n_clusters, random_state):
     return silhouette_score
 
 
+def pca(df, n_components=2):
+    # Reducing the dimensions of the data
+    pca = PCA(n_components=n_components)
+    pca_df = pca.fit_transform(df)
+    pca_df = pd.DataFrame(pca_df)
+    pca_df.columns = ['P1', 'P2']
+    return pca_df
+
+
+def standardize_and_normalize(X):
+    # Standardize data
+    scaler = StandardScaler()
+    scaled_df = scaler.fit_transform(X)
+    # Normalizing the Data
+    normalized_df = normalize(scaled_df)
+    # # Converting the numpy array into a pandas DataFrame
+    # normalized_df = pd.DataFrame(normalized_df)
+    return normalized_df
+
+
 def main(random_state, selected_component):
     # Generate some data
     X = generate_data()
     X = pd.DataFrame(data=X)
+    X = standardize_and_normalize(X)
+    # PCA
+    X = pca(X, n_components=2)
     # visualize raw data
     visualize_data(X)
     # decide how many components using silhouette score
@@ -105,5 +132,5 @@ def main(random_state, selected_component):
 
 if __name__ == '__main__':
     random_state = 42
-    selected_component = 4
+    selected_component = 3
     main(random_state, selected_component)
