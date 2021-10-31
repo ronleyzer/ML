@@ -5,6 +5,7 @@ from sklearn.datasets import make_blobs
 from sklearn.mixture import GaussianMixture as GMM
 from matplotlib.patches import Ellipse
 import pandas as pd
+from sklearn import metrics
 
 
 def generate_data():
@@ -65,20 +66,44 @@ def plot_gmm(gmm, X, label=True, ax=None):
     plt.show()
 
 
-def main():
+def plot_silhouette_scores(n_clusters, silhouette_scores):
+    fig = plt.figure()
+    plt.plot(n_clusters, silhouette_scores, 'bo-', color='black')
+    fig.tight_layout()
+    plt.xlabel('N. of clusters')
+    plt.ylabel('Silhouette Score')
+    plt.title('Identify the number of clusters using Silhouette Score')
+    plt.show()
+
+
+def silhouette_scores(X, n_clusters, random_state):
+    silhouette_score = []
+    for k in n_clusters:
+        # Set the model and its parameters
+        labels, gmm = create_gmm(X, n_components=k, random_state=random_state)
+        # Calculate Silhoutte Score and append to a list
+        silhouette_score.append(metrics.silhouette_score(X, labels, metric='euclidean'))
+    return silhouette_score
+
+
+def main(random_state, selected_component):
     # Generate some data
     X = generate_data()
     X = pd.DataFrame(data=X)
     # visualize raw data
     visualize_data(X)
+    # decide how many components using silhouette score
+    n_clusters = range(2, 9)
+    silhouette_score = silhouette_scores(X, n_clusters, random_state)
+    plot_silhouette_scores(n_clusters, silhouette_score)
     # Generalizing E–M: Gaussian Mixture Models
-    labels, gmm = create_gmm(X, n_components=4, random_state=42)
+    labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
     # visualize after GMM
     visualize_gmm(labels, X)
     plot_gmm(gmm, X, label=True, ax=None)
 
 
-    print("FY!")
-
 if __name__ == '__main__':
-    main()
+    random_state = 42
+    selected_component = 4
+    main(random_state, selected_component)
