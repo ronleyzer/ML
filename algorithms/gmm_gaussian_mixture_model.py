@@ -123,6 +123,14 @@ def plot_time_series(X, labels, df):
     plt.show()
 
 
+def add_target(X):
+    X['SNP Compounded'] = (pd.read_csv(r'P:\ML\kaggle\clustering\td_risk_y.csv', index_col=[0],
+                                       parse_dates=[0], dayfirst=True).loc['2002-01-01':'2019-01-01']).iloc[:, 0]
+    X = X.loc['2016-01-01':]
+    sns.scatterplot(data=X, x=X.index, y='SNP Compounded', hue='label')
+    plt.show()
+
+
 def main(random_state, selected_component, time_series):
     # Generate some data
     df = generate_data()
@@ -141,12 +149,7 @@ def main(random_state, selected_component, time_series):
         labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
         plot_time_series(X, labels, df)
         # add "target"
-
-        X['SNP Compounded'] = (pd.read_csv(r'P:\ML\kaggle\clustering\td_risk_y.csv', index_col=[0],
-                                           parse_dates=[0], dayfirst=True).loc['2002-01-01':'2019-01-01']).iloc[:, 0]
-        X = X.loc['2016-01-01':]
-        sns.scatterplot(data=X, x=X.index, y='SNP Compounded', hue='label')
-        plt.show()
+        add_target(X)
 
     else:
         # PCA
