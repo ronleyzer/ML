@@ -170,7 +170,7 @@ def main(random_state, selected_component, time_series):
 if __name__ == '__main__':
     random_state = 42
     selected_component = 3
-    time_series = True
+    time_series = False
     main(random_state, selected_component, time_series)
 
 
