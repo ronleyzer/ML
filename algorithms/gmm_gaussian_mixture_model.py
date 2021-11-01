@@ -136,6 +136,8 @@ def main(random_state, selected_component, time_series):
     df = generate_data()
     X = df.copy()
     X = pd.DataFrame(data=X)
+    # take only positive samples
+
     X = standardize_and_normalize(X)
     # if time series, visualize over time
     if time_series:
@@ -170,7 +172,7 @@ def main(random_state, selected_component, time_series):
 if __name__ == '__main__':
     random_state = 42
     selected_component = 3
-    time_series = True
+    time_series = False
     main(random_state, selected_component, time_series)
 
 
