@@ -19,7 +19,10 @@ def get_the_data():
 
 
 def visualize_the_explained_variance(explained_variance):
-    plt.plot(explained_variance)
+    cum_explained_variance = np.cumsum(explained_variance * 100)
+    a = pd.DataFrame(cum_explained_variance)
+    plt.scatter(a.index, a)
+    # plt.plot(cum_explained_variance)
     plt.xlabel('Number of components')
     plt.ylabel('Explained variance')
     plt.show()
