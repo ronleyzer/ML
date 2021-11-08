@@ -8,8 +8,11 @@ from algorithms.gmm_gaussian_mixture_model import standardize_and_normalize
 
 
 def main():
-    
-    pass
+    X = get_the_data()
+    standardize_and_normalize(X)
+    # select the number of components to the pca
+    explained_variance, pca_df = pca(X, n_components=X.shape[1], random_stat=111)
+    visualize_the_explained_variance(explained_variance)
 
 
 def get_the_data():
@@ -39,10 +42,5 @@ def pca(df, n_components, random_stat):
 
 
 if __name__ == '__main__':
-    X = get_the_data()
-    standardize_and_normalize(X)
-    # select the number of components to the pca
-    explained_variance, pca_df = pca(X, n_components=X.shape[1], random_stat=111)
-    visualize_the_explained_variance(explained_variance)
+    main()
 
-    print("HY!")
