@@ -110,7 +110,7 @@ def main():
     '''
     distances = nearest_neighbors(df)
     plot_k_distance(distances)
-    ''' The value of minPoints depends on domain knowledge. '''
+    ''' The value of minPoints depends on domain knowledge'''
     dbscan(df, eps=30, min_samples=6)
     plot_the_data(df, 'DBSCAN Clustering', c=df['DBSCAN_labels'],
                   cmap=matplotlib.colors.ListedColormap(color_pallet))
