@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn import datasets
 from sklearn.decomposition import PCA
 
-from algorithms.gmm_gaussian_mixture_model import standardize_and_normalize
+from algorithms.clustering.gmm_gaussian_mixture_model import standardize_and_normalize
 
 
 def main():
