@@ -104,7 +104,7 @@ def select_threshold(yval, pval):
     return best_epi, best_F1
 
 
-def plot_optimal_threshold(X, mu, sigma2, epsilon, p):
+def plot_optimal_threshold(X, epsilon, p, title):
     plt.figure(figsize=(8, 6))
     # plot the data
     plt.scatter(X[:, 0], X[:, 1], marker="x")
@@ -120,6 +120,7 @@ def plot_optimal_threshold(X, mu, sigma2, epsilon, p):
     plt.ylim(0, 35)
     plt.xlabel("Latency (ms)")
     plt.ylabel("Throughput (mb/s)")
+    plt.title(f"{title}")
     plt.show()
 
 
@@ -130,6 +131,7 @@ def split_train_cv_test_normal_and_anomaly(mat):
     :param mat: dict data with target
     :return:
     '''
+
     X = mat["Xval"]
     y = mat["yval"]
 
@@ -141,6 +143,7 @@ def split_train_cv_test_normal_and_anomaly(mat):
     y_normal = y[normal]
     y_anomaly = y[anomaly]
 
+    np.random.seed(111)
     uniform_dis_normal = (np.random.uniform(size=len(X_normal)))[:, np.newaxis]
     uniform_dis_anomaly = (np.random.uniform(size=len(X_anomaly)))[:, np.newaxis]
 
@@ -158,6 +161,7 @@ def split_train_cv_test_normal_and_anomaly(mat):
 
     return X_train, X_cv, X_test, y_train, y_cv, y_test
 
+
 def main():
     X, yval, mat = get_the_data()
     plot_the_data(X)
@@ -165,7 +169,7 @@ def main():
     X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
 
     '''estimate parameters (mean and variance) for the Gaussian model'''
-    mu, sigma2 = estimate_gaussian(X)
+    mu, sigma2 = estimate_gaussian(X_train)
     '''Now that you have estimated the Gaussian parameters, you can investigate
        which examples have a very high probability given this distribution and which
        examples have a very low probability.'''
@@ -173,14 +177,17 @@ def main():
     # visualize_fit(X, mu, sigma2)
     '''for every sample compute its product of probability-density-functions over all the features 
     The low probability examples are more likely to be the anomalies in our dataset.'''
-    pval = multivariate_gaussian(X, mu, sigma2)
+    pval = multivariate_gaussian(X_cv, mu, sigma2)
     '''select threshold - One way to determine which
         examples are anomalies is to select the threshold ε using the F1 score on a cross validation set.'''
-    epsilon, F1 = select_threshold(yval, pval)
+    epsilon, F1 = select_threshold(y_cv, pval)
     print("Best epsilon found using cross-validation:", epsilon)
     print("Best F1 on Cross Validation Set:", F1)
-    '''Visualizing the optimal threshold'''
-    plot_optimal_threshold(X, mu, sigma2, epsilon, pval)
+    '''Visualizing the optimal threshold cv'''
+    plot_optimal_threshold(X_cv, epsilon, pval, title="cv")
+    '''Visualizing the optimal threshold test'''
+    pval = multivariate_gaussian(X_test, mu, sigma2)
+    plot_optimal_threshold(X_test, epsilon, pval, title="test")
 
 
 if __name__ == '__main__':
