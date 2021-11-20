@@ -12,7 +12,6 @@ def get_the_data():
     path_in = r'P:\ML\data\anommaly_detection'
     mat = loadmat(fr"{path_in}\ex8data1.mat")
     X = mat["X"]
-    Xval = mat["Xval"]
     yval = mat["yval"]
     return X, yval, mat
 
@@ -49,20 +48,6 @@ def multivariate_gaussian(X, mu, sigma2):
     p = 1 / ((2 * np.pi) ** (k / 2) * (np.linalg.det(sigma2) ** 0.5)) * np.exp(
         -0.5 * np.sum(X @ np.linalg.pinv(sigma2) * X, axis=1))
     return p
-
-
-def visualize_fit(X, mu, sigma2):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(X[:, 0], X[:, 1], marker="x")
-    # X1, X2 = np.meshgrid(np.linspace(0, 35, num=70), np.linspace(0, 35, num=70))
-    # p2 = multivariate_gaussian(np.hstack((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis])), mu, sigma2)
-    # contour_level = 10 ** np.array([np.arange(-20, 0, 3, dtype=np.float)]).T
-    # plt.contour(X1, X2, p2[:, np.newaxis].reshape(X1.shape), contour_level)
-    plt.xlim(0, 35)
-    plt.ylim(0, 35)
-    plt.xlabel("Latency (ms)")
-    plt.ylabel("Throughput (mb/s)")
-    plt.show()
 
 
 def select_threshold(yval, pval):
@@ -108,12 +93,6 @@ def plot_optimal_threshold(X, epsilon, p, title):
     plt.figure(figsize=(8, 6))
     # plot the data
     plt.scatter(X[:, 0], X[:, 1], marker="x")
-    # potting of contour
-    # X1, X2 = np.meshgrid(np.linspace(0, 35, num=70), np.linspace(0, 35, num=70))
-    # p2 = multivariate_gaussian(np.hstack((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis])), mu, sigma2)
-    # contour_level = 10 ** np.array([np.arange(-20, 0, 3, dtype=np.float)]).T
-    # plt.contour(X1, X2, p2[:, np.newaxis].reshape(X1.shape), contour_level)
-    # Circling of anomalies
     outliers = np.nonzero(p < epsilon)[0]
     plt.scatter(X[outliers, 0], X[outliers, 1], marker="o", facecolor="none", edgecolor="r", s=70)
     plt.xlim(0, 35)
@@ -173,8 +152,6 @@ def main():
     '''Now that you have estimated the Gaussian parameters, you can investigate
        which examples have a very high probability given this distribution and which
        examples have a very low probability.'''
-    # '''visualize the fit'''
-    # visualize_fit(X, mu, sigma2)
     '''for every sample compute its product of probability-density-functions over all the features 
     The low probability examples are more likely to be the anomalies in our dataset.'''
     pval = multivariate_gaussian(X_cv, mu, sigma2)
