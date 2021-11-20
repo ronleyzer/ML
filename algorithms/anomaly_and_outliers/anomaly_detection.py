@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+import os
+import scipy
 
 ''' this code is base on Androw Neg ML curs on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
@@ -9,8 +11,12 @@ https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anom
 
 
 def get_the_data():
-    path_in = r'P:\ML\data\anommaly_detection'
+    path_in = r'P:\ML\data\anomaly_detection'
     mat = loadmat(fr"{path_in}\ex8data1.mat")
+    # save the data in repo
+    # scipy.io.savemat('anomaly_two_features_and_target.mat', mat)
+    # f =  os.getcwd() + '/' + f"anomaly_two_features_and_target.mat"
+    # mat = loadmat(os.getcwd() + '/' + f"anomaly_two_features_and_target.mat")
     X = mat["X"]
     yval = mat["yval"]
     return X, yval, mat
@@ -146,7 +152,6 @@ def main():
     plot_the_data(X)
     '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
     X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
-
     '''estimate parameters (mean and variance) for the Gaussian model'''
     mu, sigma2 = estimate_gaussian(X_train)
     '''Now that you have estimated the Gaussian parameters, you can investigate
