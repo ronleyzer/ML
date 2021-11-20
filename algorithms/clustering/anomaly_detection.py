@@ -14,7 +14,7 @@ def get_the_data():
     X = mat["X"]
     Xval = mat["Xval"]
     yval = mat["yval"]
-    return X, yval
+    return X, yval, mat
 
 
 def plot_the_data(X):
@@ -54,9 +54,9 @@ def multivariate_gaussian(X, mu, sigma2):
 def visualize_fit(X, mu, sigma2):
     plt.figure(figsize=(8, 6))
     plt.scatter(X[:, 0], X[:, 1], marker="x")
-    X1, X2 = np.meshgrid(np.linspace(0, 35, num=70), np.linspace(0, 35, num=70))
-    p2 = multivariate_gaussian(np.hstack((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis])), mu, sigma2)
-    contour_level = 10 ** np.array([np.arange(-20, 0, 3, dtype=np.float)]).T
+    # X1, X2 = np.meshgrid(np.linspace(0, 35, num=70), np.linspace(0, 35, num=70))
+    # p2 = multivariate_gaussian(np.hstack((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis])), mu, sigma2)
+    # contour_level = 10 ** np.array([np.arange(-20, 0, 3, dtype=np.float)]).T
     # plt.contour(X1, X2, p2[:, np.newaxis].reshape(X1.shape), contour_level)
     plt.xlim(0, 35)
     plt.ylim(0, 35)
@@ -123,11 +123,46 @@ def plot_optimal_threshold(X, mu, sigma2, epsilon, p):
     plt.show()
 
 
+def split_train_cv_test_normal_and_anomaly(mat):
+    '''
+    this function take ndarray of the data, split to normal and non-normal and split the data so
+    that train gets 60% of the normal samples, cv and test each gets 20% of normals, and 50% of anomaly samples
+    :param mat: dict data with target
+    :return:
+    '''
+    X = mat["Xval"]
+    y = mat["yval"]
+
+    normal = np.squeeze(mat["yval"] == 0)
+    anomaly = np.squeeze(mat["yval"] == 1)
+
+    X_normal = X[normal]
+    X_anomaly = X[anomaly]
+    y_normal = y[normal]
+    y_anomaly = y[anomaly]
+
+    uniform_dis_normal = (np.random.uniform(size=len(X_normal)))[:, np.newaxis]
+    uniform_dis_anomaly = (np.random.uniform(size=len(X_anomaly)))[:, np.newaxis]
+
+    X_train = X_normal[np.squeeze(uniform_dis_normal <= 0.6)]
+    X_cv = np.append(X_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
+                     X_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
+    X_test = np.append(X_normal[np.squeeze(uniform_dis_normal > 0.8)],
+                       X_anomaly[np.squeeze(uniform_dis_anomaly > 0.5)], axis=0)
+
+    y_train = y_normal[np.squeeze(uniform_dis_normal <= 0.6)]
+    y_cv = np.append(y_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
+                     y_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
+    y_test = np.append(y_normal[np.squeeze(uniform_dis_normal > 0.8)],
+                       y_anomaly[np.squeeze(uniform_dis_anomaly > 0.5)], axis=0)
+
+    return X_train, X_cv, X_test, y_train, y_cv, y_test
+
 def main():
-    X, yval = get_the_data()
+    X, yval, mat = get_the_data()
     plot_the_data(X)
     '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
-
+    X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
 
     '''estimate parameters (mean and variance) for the Gaussian model'''
     mu, sigma2 = estimate_gaussian(X)
