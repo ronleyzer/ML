@@ -1,13 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.ensemble import IsolationForest
-from sklearn.covariance import EllipticEnvelope
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import OneClassSVM
-from sklearn.neighbors import LocalOutlierFactor
+
 
 '''Anomalies are patterns of different data within given data,
     whereas Outliers would be merely extreme data points within data. 
