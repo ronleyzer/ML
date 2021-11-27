@@ -38,21 +38,47 @@ def try_distance(x, y):
         return np.nan
 
 
+def get_max_height(bars):
+    max_height = 0
+    min_height = 0
+    for bar in bars:
+        if bar.get_height()>max_height:
+            max_height = bar.get_height()
+        if bar.get_height()<min_height:
+            min_height = bar.get_height()
+    return max_height, min_height
+
+
+def add_text_to_bar(bars, ax):
+    max_height, min_height = get_max_height(bars)
+    for bar in bars:
+        if bar.get_height() > 0:
+            additional_pos = max_height * 0.01
+        else:
+            additional_pos = min_height * 0.2
+        bar_color = bar.get_facecolor()
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + additional_pos,
+            str(round(bar.get_height(), 1)) + '%',
+            horizontalalignment='center',
+            color=bar_color,
+            weight='bold'
+        )
+
+
 def bar_plot(df, feature, title):
     # Use Matplotlib's font manager to rebuild the font library.
     mpl.font_manager._rebuild()
-
     # Use the newly integrated Roboto font family for all text.
     plt.rc('font', family='Liberation Sans')
-
     fig, ax = plt.subplots()
-
+    plt.figure(figsize=(24, 12))
     # Save the chart so we can loop through the bars below.
-
     bars = ax.bar(
         x=np.arange(df[feature].size),
         height=df[feature],
-        tick_label=df.index
+        tick_label=[name[:3] for name in list(df.index)]
     )
 
     # Axis formatting.
@@ -64,68 +90,57 @@ def bar_plot(df, feature, title):
     ax.set_axisbelow(True)
     ax.yaxis.grid(True, color='#EEEEEE')
     ax.xaxis.grid(False)
-
     # Add text annotations to the top of the bars.
-    bar_color = bars[0].get_facecolor()
-    for bar in bars:
-      if bar.get_height() > 0:
-          additional_pos = 0.3
-      else:
-          additional_pos = -2.3
-
-      ax.text(
-          bar.get_x() + bar.get_width() / 2,
-          bar.get_height() + additional_pos,
-          str(round(bar.get_height(), 1))+'%',
-          horizontalalignment='center',
-          color=bar_color,
-          weight='bold'
-      )
-
+    add_text_to_bar(bars, ax)
     # Add labels and a title.
     ax.set_xlabel(' ', labelpad=15, color='#333333')
     ax.set_ylabel(' ', labelpad=15, color='#333333')
     ax.set_title(title, pad=15, color='#333333',
                  weight='bold')
-
     fig.tight_layout()
 
 
-def bar_plot_multiple(ax, data, colors=None, total_width=0.8, single_width=1, legend=True):
-    # Check if colors where provided, otherwhise use the default color cycle
+def bar_plot_multiple(ax, data, colors=None, total_width=0.8, single_width=1, legend=True, title=''):
+    # Check if colors where provided, otherwise use the default color cycle
     if colors is None:
         colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
     # Number of bars per group
     n_bars = len(data)
-
     # The width of a single bar
     bar_width = total_width / n_bars
-
     # List containing handles for the drawn bars, used for the legend
     bars = []
     group_centers = []
-
+    max_y = 0
+    min_y = 0
     # Iterate over all data
     for i, (name, values) in enumerate(data.items()):
         # The offset in x direction of that bar
         x_offset = (i - n_bars / 2) * bar_width + bar_width / 2
-
         # group_centers.append(x_offset)
         # Draw a bar for every value of that type
         for x, y in enumerate(values):
             bar = ax.bar(x + x_offset, y, width=bar_width * single_width, color=colors[i % len(colors)])
+            if np.max(y) > max_y:
+                max_y = np.max(y)
+            if np.min(y) < min_y:
+                min_y = np.min(y)
             if i == 2:
                 group_centers.append(x + x_offset)
-        # Add a handle to the last drawn bar, which we'll need for the legend
-        bars.append(bar[0])
-
+            # Add a handle to the last drawn bar, which we'll need for the legend
+            bars.append(bar[0])
     # fix x axis
     ax.set_xticks(group_centers)
     ax.set_xticklabels(list(data.index))
-    # Draw legend if we need
+    # text
+    plt.ylim(1.3 * min_y, 1.3*max_y)
     if legend:
         ax.legend(bars, data.keys())
+        leg = ax.get_legend()
+        for i in range(len(leg.legendHandles)):
+            leg.legendHandles[i].set_color(colors[i % len(colors)])
+    add_text_to_bar(bars, ax)
+    plt.title(title, pad=15, color='#333333', weight='bold')
 
 
 def two_sides_bar_plot(upper_plot_y, lowe_plot_y, x, title):
@@ -145,13 +160,26 @@ def two_sides_bar_plot(upper_plot_y, lowe_plot_y, x, title):
     plt.tight_layout()
 
 
+def create_weighted_df(df, weights_column):
+    weighted_df = df.copy()
+    weighted_df['rounded_weight'] = np.round(weighted_df[weights_column]).astype('int64')
+    weighted_df = weighted_df.loc[weighted_df.index.repeat(weighted_df['rounded_weight'])]
+    return weighted_df
+
+
 def main():
+
     pd.options.display.width = 0
 
     ''' get the data '''
     gym_data = {}
+    gym_data_weighted = {}
     for key in gym_path.keys():
         gym_data[key] = pd.read_csv(f'{path_in}\\{gym_path[key]}.csv', parse_dates=[0], dayfirst=True)
+        gym_data[key]['sum_weight'] = gym_data[key]['visit_weight'] + gym_data[key]['customer_weight']
+        gym_data_weighted[key] = {}
+        for weight in ['visit_weight', 'customer_weight', 'sum_weight']:
+            gym_data_weighted[key][weight] = create_weighted_df(gym_data[key], weight)
 
     '''open output folder'''
     folder = fr"{path_in}\out"
@@ -256,7 +284,8 @@ def main():
 
     '''time series'''
     '''visit pct change for gym 10790'''
-    alpharetta_visits = bar_plot(monthly_df_dic['10790'], 'visit_id_pct_cng', title='Alpharetta Monthly Visits Change MOM')
+    bar_plot(monthly_df_dic['10790'], 'visit_id_pct_cng', title='Alpharetta Monthly Visits Change MOM')
+    # plt.savefig(fr"{path_in}\Alpharetta Monthly Visits Change MOM.png")
     plt.show()
     plt.close()
     '''visit pct change for all gyms '''
@@ -265,22 +294,23 @@ def main():
     for key in monthly_df_dic.keys():
         monthly_df_visits[key] = monthly_df_dic[key]['visit_id_pct_cng']
     monthly_df_visits.rename(columns={'10790':'Alpharetta', '299':'Molly Lane', '1570':'Holcomb', '13071':'Highway 9'}, inplace=True)
-    fig, ax = plt.subplots()
-    bar_plot_multiple(ax, monthly_df_visits.T[['March', 'April', 'May', 'June']], total_width=.8, single_width=.9,
-                      title='Planet Fitness Branches Visits Change MOM')
-    plt.show()
-    plt.close()
+
+    month_list = [['March', 'April', 'May', 'June'], ['July', 'August', 'September', 'October'], ['November', 'December', 'January']]
+    for months in month_list:
+        fig, ax = plt.subplots()
+        bar_plot_multiple(ax, monthly_df_visits.T[months], total_width=.8, single_width=.9,
+                          title='Planet Fitness Branches Visits Change MOM')
+        # plt.savefig(fr"{path_in}\Planet Fitness Branches Visits Change MOM {months}.png")
+        plt.show()
+        plt.close()
     '''two sides leavers and comers'''
     two_sides_bar_plot(upper_plot_y=monthly_df_dic['10790']['pct_new_comers'],
                        lowe_plot_y=monthly_df_dic['10790']['pct_leavers'],
                        x=monthly_df_dic['10790'].index, title='Alpharetta Monthly New Comers and Leavers Change MOM')
+    # plt.savefig(fr"{path_in}\Alpharetta Monthly New Comers and Leavers Change MOM.png")
     plt.show()
     plt.close()
 
-    for feature in ['visit_id_pct_cng']:
-        df = pd.DataFrame()
-        for key in monthly_df_dic:
-            df[key] = monthly_df_dic[key][feature]
     #
     # '''histograms'''
     # param_list = ['gym_distance_from_home', 'gym_distance_from_work', 'month', 'duration', 'start_hour']
