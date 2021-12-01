@@ -5,6 +5,7 @@ from numpy import log
 import numpy as np, pandas as pd
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
 plt.rcParams.update({'figure.figsize': (9, 7), 'figure.dpi': 120})
 
 
@@ -51,28 +52,50 @@ def examine_auto_correlation(df):
     axes[1, 0].plot(df.value.diff())
     result = adfuller(df.value.diff().dropna())
     axes[1, 0].set_title(f'1st Order Differencing P-value: {np.round(result[1],3)}')
-    plot_acf(df.value.diff().dropna(), ax=axes[1, 1], lags=np.arange(1, df.value.shape[0]))
+    plot_acf(df.value.diff().dropna(), ax=axes[1, 1], lags=np.arange(1, df.value.diff().shape[0]-1))
 
     # 2nd Differencing
     axes[2, 0].plot(df.value.diff().diff())
     result = adfuller(df.value.diff().diff().dropna())
     axes[2, 0].set_title(f'2nd Order Differencing P-value: {np.round(result[1],3)}')
-    plot_acf(df.value.diff().diff().dropna(), ax=axes[2, 1], lags=np.arange(1, df.value.shape[0]))
+    plot_acf(df.value.diff().diff().dropna(), ax=axes[2, 1], lags=np.arange(1, df.value.diff().diff().shape[0]-2))
 
     plt.show()
 
 
 def acf(series, acf, ylim, title):
-    '''PACF plot of 1st difference series'''
+    '''PACF plot difference series'''
     plt.rcParams.update({'figure.figsize': (9, 3), 'figure.dpi': 120})
     fig, axes = plt.subplots(1, 2, sharex=True)
     axes[0].plot(series)
     axes[0].set_title(title)
-    axes[1].set(ylim)
+    axes[1].set(ylim=ylim)
     if acf == 'partial':
-        plot_pacf(series.dropna(), ax=axes[1])
+        plot_pacf(series.dropna(), ax=axes[1], lags=np.arange(1, np.round((series.shape[0])/2-1, 0)))
+        # -1 for first diff, -2 for 2nd diff
     else:
-        plot_pacf(series.dropna(), ax=axes[1])
+        plot_acf(series.dropna(), ax=axes[1], lags=np.arange(1, (series.shape[0]-1)))
+    plt.show()
+
+
+def arima_model(df, order):
+    model = ARIMA(endog=df.value, exog=None, order=order)
+    model_fit = model.fit()
+    return model_fit
+
+
+def residual_plot(model_fit):
+    '''Plot residual errors'''
+    residuals = pd.DataFrame(model_fit.resid)
+    fig, ax = plt.subplots(1, 2)
+    residuals.plot(title="Residuals", ax=ax[0])
+    residuals.plot(kind='kde', title='Density', ax=ax[1])
+    plt.show()
+
+
+def actual_vs_predict_plot(model_fit):
+    '''Actual vs Fitted'''
+    model_fit.plot_predict(dynamic=False)
     plt.show()
 
 
@@ -122,9 +145,26 @@ def main():
     '''If your series is slightly under difference, adding one or more additional AR terms usually makes it up. 
     Likewise, if it is slightly over-difference, try adding an additional MA term.'''
 
+    '''D. After determined the values of p, d and q, fit the ARIMA model.'''
+    model_fit = arima_model(df, order=(1, 1, 2))
+    print('''\nThe model summary reveals a lot of information. The table in the middle is the coefficients table 
+    where the values under ‘coef’ are the weights of the respective terms.
+    Notice here the coefficient of the MA2 term is close to zero and the P-Value in ‘P>|z|’ 
+    column is highly insignificant. It should ideally be less than 0.05 for the respective X to be significant.
+    So, let’s rebuild the model without the MA2 term.\n''')
+    print(model_fit.summary())
 
+    model_fit = arima_model(df, order=(1, 1, 1))
+    print('''\nThe model AIC has reduced, which is good. The P Values of the AR1 and MA1 terms have improved 
+    and are highly significant (<< 0.05)..\n''')
+    print(model_fit.summary())
 
-    print("HY")
+    '''E. Plot the residuals to ensure there are no patterns (that is, look for constant mean and variance'''
+    residual_plot(model_fit)
+    '''The residual errors seem fine with near zero mean and uniform variance.'''
+
+    '''F. Plot the actual against the fitted values using'''
+    actual_vs_predict_plot(model_fit)
 
 
 if __name__ == '__main__':
