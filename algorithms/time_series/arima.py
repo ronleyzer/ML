@@ -88,14 +88,50 @@ def residual_plot(model_fit):
     '''Plot residual errors'''
     residuals = pd.DataFrame(model_fit.resid)
     fig, ax = plt.subplots(1, 2)
-    residuals.plot(title="Residuals", ax=ax[0])
-    residuals.plot(kind='kde', title='Density', ax=ax[1])
+    residuals.iloc[1:, :].plot(title="Residuals", ax=ax[0])
+    residuals.iloc[1:, :].plot(kind='kde', title='Density', ax=ax[1])
     plt.show()
 
 
-def actual_vs_predict_plot(model_fit):
+def actual_vs_predict_plot(model_fit, df_validation, steps, alpha):
     '''Actual vs Fitted'''
-    model_fit.plot_predict(dynamic=False)
+    '''forecast'''
+    forecast = model_fit.forecast(steps=steps, alpha=alpha)
+    fc_series = pd.Series(forecast, index=df_validation.index)
+
+    plt.plot(np.squeeze(fc_series), label='forecast', color='r-')
+    # plt.plot(np.squeeze(model_fit.forecasts)[1:], label='actual')
+    plt.plot(model_fit.data.endog[1:], label='training')
+    plt.plot(df_validation, label='actual')
+    plt.title('Forecast vs Actual')
+    plt.legend(loc='upper left', fontsize=8)
+    plt.show()
+
+
+def split_time_series_to_train_validation_test(df, split_pct):
+    number_of_samples = len(df)
+    num_of_observation_in_train = int(np.round(split_pct['train']*number_of_samples, 0))
+    num_of_observation_in_test = int(np.round(split_pct['test']*number_of_samples, 0))
+    '''Create Training and Test'''
+    train = pd.DataFrame(df.value[:num_of_observation_in_train])
+    validation = pd.DataFrame(df.value[num_of_observation_in_train:num_of_observation_in_test])
+    test = pd.DataFrame(df.value[num_of_observation_in_test:])
+    return train, validation, test
+
+
+def forecast_plot(df_train, df_test, forecast):
+    '''create series for 95% confidence'''
+    fc_series = pd.Series(forecast, index=df_test.index)
+    # lower_series = pd.Series(conf[:, 0], index=df_test.index)
+    # upper_series = pd.Series(conf[:, 1], index=df_test.index)
+    '''Plot'''
+    plt.figure(figsize=(12, 5), dpi=100)
+    plt.plot(df_train, label='training')
+    plt.plot(df_train, label='actual')
+    plt.plot(fc_series, label='forecast')
+    # plt.fill_between(lower_series.index, lower_series, upper_series,color='k', alpha=.15)
+    plt.title('Forecast vs Actuals')
+    plt.legend(loc='upper left', fontsize=8)
     plt.show()
 
 
@@ -106,6 +142,9 @@ def main():
     :return:
     '''
     df = get_the_data()
+    split_pct = {'train': 0.6, 'validation': 0.2, 'test': 0.2}
+    df, df_validation, df_test = split_time_series_to_train_validation_test(df, split_pct)
+
     '''A. test stationary and diff the series till it stat - 
     differencing needed only if the series is non-stationary
     null hypothesis of the adfuller test is that the time series is non-stationary. 
@@ -163,8 +202,11 @@ def main():
     residual_plot(model_fit)
     '''The residual errors seem fine with near zero mean and uniform variance.'''
 
-    '''F. Plot the actual against the fitted values using'''
-    actual_vs_predict_plot(model_fit)
+    '''F. Forecast and plot the actual against the fitted values using'''
+    actual_vs_predict_plot(model_fit, df_validation, steps=15, alpha=0.05)
+
+
+    # forecast_plot(df, df_validation, forecast, )
 
 
 if __name__ == '__main__':
