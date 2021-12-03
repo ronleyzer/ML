@@ -1,12 +1,10 @@
 from random import gauss
 from random import seed
-
 import pandas as pd
 from arch import arch_model
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
 from statsmodels.graphics.tsaplots import plot_acf
-
 from algorithms.time_series.arima import split_time_series_to_train_validation_test
 
 
