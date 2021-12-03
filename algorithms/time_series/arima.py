@@ -6,6 +6,7 @@ import numpy as np, pandas as pd
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
+from pandas.plotting import autocorrelation_plot
 plt.rcParams.update({'figure.figsize': (9, 7), 'figure.dpi': 120})
 
 
@@ -25,9 +26,8 @@ def find_non_stationary_and_plot(df):
     return non_stationary, result
 
 
-def get_the_data():
-    y = pd.read_csv('https://raw.githubusercontent.com/selva86/datasets/master/wwwusage.csv',
-                    names=['value'], header=0)
+def get_the_data(path):
+    y = pd.read_csv(path, names=['value'], header=0)
     return y
 
 
@@ -93,17 +93,15 @@ def residual_plot(model_fit):
     plt.show()
 
 
-def actual_vs_predict_plot(model_fit, df_validation, steps, alpha):
+def actual_vs_predict_plot(model_fit, df_validation, steps, alpha, order):
     '''Actual vs Fitted'''
     '''forecast'''
     forecast = model_fit.forecast(steps=steps, alpha=alpha)
-    fc_series = pd.Series(forecast, index=df_validation.index)
-
-    plt.plot(np.squeeze(fc_series), label='forecast', color='r-')
-    # plt.plot(np.squeeze(model_fit.forecasts)[1:], label='actual')
-    plt.plot(model_fit.data.endog[1:], label='training')
+    fc_series = pd.Series(forecast, index=df_validation.index).fillna(model_fit.data.endog[-1])
+    plt.plot(np.squeeze(fc_series), label='forecast', color='r')
+    plt.plot(model_fit.data.endog, label='training')
     plt.plot(df_validation, label='actual')
-    plt.title('Forecast vs Actual')
+    plt.title(f'Forecast vs Actual ARIMA params: AR={order[0]}, target_diff={order[1]}, MA={order[1]}')
     plt.legend(loc='upper left', fontsize=8)
     plt.show()
 
@@ -111,37 +109,29 @@ def actual_vs_predict_plot(model_fit, df_validation, steps, alpha):
 def split_time_series_to_train_validation_test(df, split_pct):
     number_of_samples = len(df)
     num_of_observation_in_train = int(np.round(split_pct['train']*number_of_samples, 0))
-    num_of_observation_in_test = int(np.round(split_pct['test']*number_of_samples, 0))
+    num_of_observation_in_validation = int(np.round(split_pct['validation']*number_of_samples, 0))
     '''Create Training and Test'''
-    train = pd.DataFrame(df.value[:num_of_observation_in_train])
-    validation = pd.DataFrame(df.value[num_of_observation_in_train:num_of_observation_in_test])
-    test = pd.DataFrame(df.value[num_of_observation_in_test:])
+    train = pd.DataFrame(df.value[:(num_of_observation_in_train+1)])
+    validation = pd.DataFrame(df.value[num_of_observation_in_train:
+                                       (num_of_observation_in_train+num_of_observation_in_validation)])
+    test = pd.DataFrame(df.value[(num_of_observation_in_train+num_of_observation_in_validation):])
     return train, validation, test
 
 
-def forecast_plot(df_train, df_test, forecast):
-    '''create series for 95% confidence'''
-    fc_series = pd.Series(forecast, index=df_test.index)
-    # lower_series = pd.Series(conf[:, 0], index=df_test.index)
-    # upper_series = pd.Series(conf[:, 1], index=df_test.index)
-    '''Plot'''
-    plt.figure(figsize=(12, 5), dpi=100)
-    plt.plot(df_train, label='training')
-    plt.plot(df_train, label='actual')
-    plt.plot(fc_series, label='forecast')
-    # plt.fill_between(lower_series.index, lower_series, upper_series,color='k', alpha=.15)
-    plt.title('Forecast vs Actuals')
-    plt.legend(loc='upper left', fontsize=8)
+def auto_correlation(selected_diff):
+    autocorrelation_plot(selected_diff.dropna())
+    plt.title('AR Selection Using Auto-Correlation')
     plt.show()
 
 
 def main():
     '''
     ARIMA model
-    based on: https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/
+    based on: https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/ ,
+    https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/
     :return:
     '''
-    df = get_the_data()
+    df = get_the_data(path='https://raw.githubusercontent.com/selva86/datasets/master/wwwusage.csv')
     split_pct = {'train': 0.6, 'validation': 0.2, 'test': 0.2}
     df, df_validation, df_test = split_time_series_to_train_validation_test(df, split_pct)
 
@@ -169,19 +159,23 @@ def main():
     after excluding the contributions from the intermediate lags.
     '''
     selected_diff = df.value.diff()
-    acf(selected_diff, acf='partial', ylim=(0, 5), title='Order of AR Term')
+    '''Partial Auto Correlation Function (PACF)- As the name implies, PACF is a subset of ACF. 
+    PACF expresses the correlation between observations made at two points in time while accounting 
+    for any influence from other data points. We can use PACF to determine the optimal number of terms to use 
+    in the AR model. The number of terms determines the order of the model.'''
+    auto_correlation(selected_diff)
+    # acf(selected_diff, acf='partial', ylim=(0, 1.2), title='Order of AR Term')
     '''the PACF lag 1 is quite significant since is well above the significance line. 
     Lag 2 turns out to be significant as well, slightly managing to cross the significance limit (blue region). 
     But I am going to be conservative and tentatively fix the p as 1.'''
 
     '''C. Find the order of the MA term (q)
     An MA term is the error of the lagged forecast.
-    The ACF tells how many MA terms are required to remove any auto correlation in the stationary series.'''
-    acf(selected_diff, acf='', ylim=(0, 1.2), title='Order of MA Term')
-    '''Couple of lags are well above the significance line. So, let’s tentatively fix q as 2. 
-    When in doubt, go with the simpler model that sufficiently explains the Y.'''
-
-    '''If your series is slightly under difference, adding one or more additional AR terms usually makes it up. 
+    The ACF tells how many MA terms are required to remove any auto correlation in the stationary series.
+    Auto Correlation Function (ACF)- The correlation between the observations at the current point in time 
+    and the observations at all previous points in time. We can use ACF to determine the optimal number of MA terms. 
+    The number of terms determines the order of the model.
+    If your series is slightly under difference, adding one or more additional AR terms usually makes it up. 
     Likewise, if it is slightly over-difference, try adding an additional MA term.'''
 
     '''D. After determined the values of p, d and q, fit the ARIMA model.'''
@@ -192,21 +186,31 @@ def main():
     column is highly insignificant. It should ideally be less than 0.05 for the respective X to be significant.
     So, let’s rebuild the model without the MA2 term.\n''')
     print(model_fit.summary())
-
-    model_fit = arima_model(df, order=(1, 1, 1))
+    order = (1, 1, 1)
+    model_fit = arima_model(df, order=order)
     print('''\nThe model AIC has reduced, which is good. The P Values of the AR1 and MA1 terms have improved 
     and are highly significant (<< 0.05)..\n''')
     print(model_fit.summary())
 
-    '''E. Plot the residuals to ensure there are no patterns (that is, look for constant mean and variance'''
+    '''E. Forecast validation and plot the actual against the fitted values using'''
+    actual_vs_predict_plot(model_fit, df_validation, steps=len(df_validation), alpha=0.05, order=order)
+    '''From the chart, the ARIMA(1,1,1) model seems to give a directionally correct forecast. 
+    But each of the predicted forecasts is consistently below the actual. 
+    That means, by adding a small constant to our forecast, the accuracy will certainly improve.'''
+
+    '''F. Manually correction of orders - increase the order of differencing to two, 
+    that is set d=2 and iteratively increase p to up to 5 and then q up to 5 to 
+    check which model gives least AIC and also look for a chart that gives closer actual and forecasts.
+    While doing that the P values of the AR and MA terms should be as close to zero, ideally, less than 0.05.'''
+    orders = [(2, 1, 1), (1, 1, 2), (3, 1, 2), (3, 1, 1)]
+    for order in orders:
+        model_fit = arima_model(df, order=order)
+        actual_vs_predict_plot(model_fit, df_validation, steps=len(df_validation), alpha=0.05, order=order)
+
+    '''G. Plot the residuals to ensure there are no patterns (that is, look for constant mean and variance)'''
     residual_plot(model_fit)
     '''The residual errors seem fine with near zero mean and uniform variance.'''
-
-    '''F. Forecast and plot the actual against the fitted values using'''
-    actual_vs_predict_plot(model_fit, df_validation, steps=15, alpha=0.05)
-
-
-    # forecast_plot(df, df_validation, forecast, )
+    print(model_fit.summary())
 
 
 if __name__ == '__main__':
