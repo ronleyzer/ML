@@ -47,6 +47,17 @@ def line_plot(data, title):
     pyplot.show()
 
 
+def actual_vs_predict_plot(forecast_variance, df_train, df_validation):
+    plt.plot(df_train, label='Training')
+    '''plot the actual variance'''
+    plt.plot(df_validation, label='Actual')
+    '''plot forecast variance'''
+    plt.plot(forecast_variance, label='Forecast', color='r')
+    plt.title('Actual VS Predict')
+    plt.legend()
+    plt.show()
+
+
 def main():
     '''
     How to Model Volatility with ARCH and GARCH for Time Series Forecasting
@@ -75,11 +86,15 @@ def main():
 
     '''define and fit ARCH model, p stands for the number of lag squared residual errors 
     to include in the ARCH model.'''
-    model = arch_model(df_train, mean='Zero', vol='ARCH', p=6)
+    model = arch_model(df_train, mean='Zero', vol='ARCH', lags=1, p=6, o=1, q=1)
     model_fit = model.fit()
 
     '''forecast the test set'''
     y_hat = model_fit.forecast(horizon=len(df_validation), reindex=True)
+    new_index = list(range(len(df_train) - 1, len(df_train + df_validation) + 1))
+    forecast_variance = pd.DataFrame(index=new_index[:-1], data=y_hat.variance.values[-1, :])
+
+    actual_vs_predict_plot(forecast_variance, df_train, df_validation)
 
 
 if __name__ == '__main__':
