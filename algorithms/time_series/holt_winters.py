@@ -4,6 +4,8 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from algorithms.time_series.arima import split_time_series_to_train_validation_test
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
 def background():
@@ -22,6 +24,10 @@ def background():
              
              Seasonality-\n
              Certain patterns that periodically repeated.
+             
+             Disadvantages:
+             Holt-Winters forecasting cannot handle Time Series data with irregular patterns well.
+             HWES is a Univariate Forecasting technique and works with Stationary Time Series data.
              ''')
 
 
@@ -55,7 +61,7 @@ def main():
 
     '''Define the weight coefficient Alpha and the Time Period, 
     and set the DateTime frequency to a monthly level (m = Time Period).'''
-    airline.index.freq = 'MS'
+    # airline.index.freq = 'MS'
     m = 12
     alpha = 1 / (2 * m)
 
@@ -65,9 +71,9 @@ def main():
     Double HWES can as well consider data with trends and Triple HWES can even handle Seasonality.'''
 
     '''Single Exponential Smoothing'''
-    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).\
-        fit(smoothing_level=alpha, optimized=False, use_brute=True).fittedvalues
+    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).fit(smoothing_level=alpha, optimized=False, use_brute=True).fittedvalues
     airline[['Thousands of Passengers', 'HWES1']].plot(title='Holt Winters Single Exponential Smoothing')
+    plt.show()
     '''As expected, it didn’t fit quite well, because single ES doesnt work for data with Trends and Seasonality.'''
 
     '''Double Exponential Smoothing'''
@@ -75,6 +81,7 @@ def main():
     airline['HWES2_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul').fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES2_ADD', 'HWES2_MUL']].plot(
         title='Holt Winters Double Exponential Smoothing: Additive and Multiplicative Trend')
+    plt.show()
     '''the fit looks better, but since we know there is Seasonality, we shall move into Triple'''
 
     '''Triple Exponential Smoothing'''
@@ -84,13 +91,31 @@ def main():
                                                 seasonal_periods=12).fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES3_ADD', 'HWES3_MUL']].plot(
         title='Holt Winters Triple Exponential Smoothing: Additive and Multiplicative Seasonality')
+    plt.show()
     '''looks promising!'''
 
     '''Forecasting with Holt-Winters Exponential Smoothing'''
+    '''split the data to train and test'''
+    split_pct = {'train': 0.8, 'validation': 0.0, 'test': 0.2}
+    train_airline, validation_airline, test_airline = split_time_series_to_train_validation_test(airline, split_pct)
 
+    fitted_model = ExponentialSmoothing(train_airline['Thousands of Passengers'], trend='mul', seasonal='mul',
+                                        seasonal_periods=12).fit()
+    test_predictions = fitted_model.forecast(len(test_airline))
+    train_airline['Thousands of Passengers'].plot(legend=True, label='TRAIN')
+    test_airline['Thousands of Passengers'].plot(legend=True, label='TEST', figsize=(6, 4))
+    test_predictions.plot(legend=True, label='PREDICTION')
+    plt.title('Train, Test and Predicted Test using Holt Winters')
+    plt.show()
 
+    '''plot predict'''
+    test_airline[['Thousands of Passengers']].plot(legend=True, label='TEST', figsize=(9, 6))
+    test_predictions.plot(legend=True, label='PREDICTION')
+    plt.show()
 
-    print("HY")
+    '''Evaluation'''
+    print(f'Mean Absolute Error = {mean_absolute_error(test_airline, test_predictions)}')
+    print(f'Mean Squared Error = {mean_squared_error(test_airline, test_predictions)}')
 
 
 if __name__ == '__main__':

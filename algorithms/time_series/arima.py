@@ -111,7 +111,7 @@ def split_time_series_to_train_validation_test(df, split_pct):
     num_of_observation_in_train = int(np.round(split_pct['train']*number_of_samples, 0))
     num_of_observation_in_validation = int(np.round(split_pct['validation']*number_of_samples, 0))
     '''Create Training and Test'''
-    train = pd.DataFrame(df[:(num_of_observation_in_train+1)])
+    train = pd.DataFrame(df[:(num_of_observation_in_train)])
     validation = pd.DataFrame(df[num_of_observation_in_train:
                                        (num_of_observation_in_train+num_of_observation_in_validation)])
     test = pd.DataFrame(df[(num_of_observation_in_train+num_of_observation_in_validation):])
