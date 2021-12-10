@@ -44,9 +44,9 @@ def main():
 
     '''decomposing the Time Series
     Look for: Levels, Trends and Seasonality in the data'''
-    # drop nan
+    # check nan
     missing_values_count = airline.isnull().sum(0).sort_values(ascending=False)
-    airline.fillna(method='ffill')
+
     # decompose
     decompose_result = seasonal_decompose(airline['Thousands of Passengers'], model='multiplicative')
     decompose_result.plot()
@@ -54,9 +54,8 @@ def main():
     '''We can quite clearly see that the data has all 3, Levels, Trends, Seasonality.'''
 
     '''Define the weight coefficient Alpha and the Time Period, 
-    and set the DateTime frequency to a monthly level.'''
+    and set the DateTime frequency to a monthly level (m = Time Period).'''
     airline.index.freq = 'MS'
-    # m = Time Period
     m = 12
     alpha = 1 / (2 * m)
 
@@ -66,10 +65,33 @@ def main():
     Double HWES can as well consider data with trends and Triple HWES can even handle Seasonality.'''
 
     '''Single Exponential Smoothing'''
-    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).fit(smoothing_level=alpha, optimized=False, use_brute=True).fittedvalues
+    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).\
+        fit(smoothing_level=alpha, optimized=False, use_brute=True).fittedvalues
     airline[['Thousands of Passengers', 'HWES1']].plot(title='Holt Winters Single Exponential Smoothing')
+    '''As expected, it didn’t fit quite well, because single ES doesnt work for data with Trends and Seasonality.'''
+
+    '''Double Exponential Smoothing'''
+    airline['HWES2_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add').fit().fittedvalues
+    airline['HWES2_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul').fit().fittedvalues
+    airline[['Thousands of Passengers', 'HWES2_ADD', 'HWES2_MUL']].plot(
+        title='Holt Winters Double Exponential Smoothing: Additive and Multiplicative Trend')
+    '''the fit looks better, but since we know there is Seasonality, we shall move into Triple'''
+
+    '''Triple Exponential Smoothing'''
+    airline['HWES3_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add', seasonal='add',
+                                                seasonal_periods=12).fit().fittedvalues
+    airline['HWES3_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul', seasonal='mul',
+                                                seasonal_periods=12).fit().fittedvalues
+    airline[['Thousands of Passengers', 'HWES3_ADD', 'HWES3_MUL']].plot(
+        title='Holt Winters Triple Exponential Smoothing: Additive and Multiplicative Seasonality')
+    '''looks promising!'''
+
+    '''Forecasting with Holt-Winters Exponential Smoothing'''
+
+
 
     print("HY")
+
 
 if __name__ == '__main__':
     main()
