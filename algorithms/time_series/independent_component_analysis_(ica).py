@@ -33,7 +33,8 @@ def background():
                Convergence is considered attained when the dot product of w and its transpose is roughly equal to 1.\n
             G. Take the dot product of w and x to get the independent source signals\n
             
-            source: https://towardsdatascience.com/independent-component-analysis-ica-in-python-a0ef0db0955e''')
+            source: https://towardsdatascience.com/independent-component-analysis-ica-in-python-a0ef0db0955e
+                    https://medium.com/analytics-vidhya/independent-component-analysis-for-signal-decomposition-3db954ffe8aa''')
 
 
 def create_3_series_with_separate_patterns():
@@ -46,22 +47,7 @@ def create_3_series_with_separate_patterns():
     return s1, s2, s3
 
 
-def main():
-    background()
-
-    s1, s2, s3 = create_3_series_with_separate_patterns()
-    S = np.c_[s1, s2, s3]
-    plt.plot(S)
-    plt.show()
-
-    S += 0.2 * np.random.normal(size=S.shape)
-    S /= S.std(axis=0)
-
-    A = np.array([[1, 1, 1], [0.5, 2, 1.0], [1.5, 1.0, 2.0]])
-    X = np.dot(S, A.T)
-    ica = FastICA(n_components=3)
-    S_ = ica.fit_transform(X)
-
+def ica_plot(X, S, S_):
     fig = plt.figure()
     models = [X, S, S_]
     names = ['mixtures', 'real sources', 'predicted sources']
@@ -73,6 +59,45 @@ def main():
             plt.plot(sig, color=color)
     fig.tight_layout()
     plt.show()
+
+
+def main():
+    background()
+
+    '''create the data or upload the data'''
+    s1, s2, s3 = create_3_series_with_separate_patterns()
+    ''' Mixing of Signals'''
+    S = np.c_[s1, s2, s3]
+    plt.plot(S)
+    plt.show()
+
+    '''Adding Noise '''
+    S += 0.2 * np.random.normal(size=S.shape)
+    '''Standardize the data'''
+    S /= S.std(axis=0)
+    plt.plot(S)
+    plt.show()
+
+    ''' take a basis vector which will decide the proportion of mixing of signals with each other.
+    The observation mixture will be produced using dot product of basis vector A and signal mixture S'''
+    '''Mixing the Data'''
+    A = np.array([[1, 1, 1], [0.5, 2, 1.0], [1.5, 1.0, 2.0]])
+
+    '''Create the Observation Data for ICA'''
+    X = np.dot(S, A.T)
+    plt.plot(X)
+    plt.show()
+
+    '''Using this model after fit transforming will able to decompose the mixing matrix 
+    and Signal mixture respectively A_ and S_'''
+    ica = FastICA(n_components=3)
+    '''Get Estimated Signals S_'''
+    S_ = ica.fit_transform(X)
+
+    '''Plotting the results'''
+    ica_plot(X, S, S_)
+
+
 
 
 if __name__ == '__main__':
