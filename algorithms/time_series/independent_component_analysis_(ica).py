@@ -78,7 +78,7 @@ def main():
     plt.plot(S)
     plt.show()
 
-    ''' take a basis vector which will decide the proportion of mixing of signals with each other.
+    '''Take a basis vector which will decide the proportion of mixing of signals with each other.
     The observation mixture will be produced using dot product of basis vector A and signal mixture S'''
     '''Mixing the Data'''
     A = np.array([[1, 1, 1], [0.5, 2, 1.0], [1.5, 1.0, 2.0]])
