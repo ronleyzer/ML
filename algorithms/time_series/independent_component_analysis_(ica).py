@@ -2,36 +2,16 @@ from sklearn.decomposition import FastICA
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import signal
+from scipy.io import wavfile
 
 
 def background():
     print('''Independent Component Analysis (ICA)\n
-            Independent component analysis separates a multivariate signal into additive\n
-            subcomponents that are maximally independent.\n\n
-            For example:\n
-            Suppose that you’re at a house party and you’re talking to some cute person.\n
-            As you listen, your ears are being bombarded by the sound coming from the conversations going on between\n 
-            different groups of people through out the house and from the music that’s playing rather loudly\n
-            in the background. Yet, none of this prevents you from focusing in on what the person is saying since\n
-            human beings possess the innate ability to differentiate between sounds.\n\n
-            If, however, this were taking place as part of scene in a movie, the microphone which we’d use to record\n
-            the conversation would lack the necessary capacity to differentiate between all the sounds going\n
-            on in the room. This is where Independent Component Analysis, or ICA for short, comes in to play.\n
-            ICA is a computational method for separating a multivariate signal into its underlying components.\n
-            Using ICA, we can extract the desired component (i.e. conversation between you and the person) from the\n
-            amalgamation of multiple signals.\n\n
-            
-            Independent Component Analysis (ICA) Algorithm\n
-            At a high level, ICA can be broken down into the following steps:\n
-            A. Center x by subtracting the mean\n
-            B. Whiten x- whitening a signal involves the eigen-value decomposition of its covariance matrix.
-                         preprocessing the signal, for each component.\n
-            C. Choose a random initial value for the de-mixing matrix w\n
-            D. Calculate the new value for w\n
-            E. Normalize w\n
-            F. Check whether algorithm has converged and if it hasn’t, return to step 4.
-               Convergence is considered attained when the dot product of w and its transpose is roughly equal to 1.\n
-            G. Take the dot product of w and x to get the independent source signals\n
+            Independent component analysis separates a multivariate signal into additive subcomponents that are
+            maximally independent. The method assume that the subcomponents are non-Gaussian signals and that they
+            are statistically independent from each other. Example application is the "cocktail party problem" 
+            of listening in on one person's speech in a noisy room.
+
             
             source: https://towardsdatascience.com/independent-component-analysis-ica-in-python-a0ef0db0955e
                     https://medium.com/analytics-vidhya/independent-component-analysis-for-signal-decomposition-3db954ffe8aa''')
@@ -61,11 +41,28 @@ def ica_plot(X, S, S_):
     plt.show()
 
 
+def mix_sources(mixtures, apply_noise=False):
+    for i in range(len(mixtures)):
+
+        max_val = np.max(mixtures[i])
+
+        if max_val > 1 or np.min(mixtures[i]) < 1:
+            mixtures[i] = mixtures[i] / (max_val / 2) - 0.5
+
+    X = np.c_[[mix for mix in mixtures]]
+
+    if apply_noise:
+        X += 0.02 * np.random.normal(size=X.shape)
+
+    return X
+
+
 def main():
     background()
 
-    '''create the data or upload the data'''
+    '''create the data'''
     s1, s2, s3 = create_3_series_with_separate_patterns()
+
     ''' Mixing of Signals'''
     S = np.c_[s1, s2, s3]
     plt.plot(S)
@@ -97,7 +94,18 @@ def main():
     '''Plotting the results'''
     ica_plot(X, S, S_)
 
+    ''''''
+    path_in = r'P:\ML\data\ica'
+    sampling_rate, mix1 = wavfile.read(fr'{path_in}\mix1.wav')
+    sampling_rate, mix2 = wavfile.read(fr'{path_in}\mix2.wav')
+    sampling_rate, source1 = wavfile.read(fr'{path_in}\source1.wav')
+    sampling_rate, source2 = wavfile.read(fr'{path_in}\source2.wav')
 
+    S = np.c_[source1, source2]
+    X = mix_sources([mix1, mix2]).T
+    ica = FastICA(n_components=2)
+    S_ = ica.fit_transform(X)
+    ica_plot(X, S, S_)
 
 
 if __name__ == '__main__':
