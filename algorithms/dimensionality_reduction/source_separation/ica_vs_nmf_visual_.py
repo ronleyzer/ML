@@ -101,7 +101,7 @@ def nmf(X, tol=1e-6, max_iter=5000, n_components=4):
 
 
 def main():
-    '''source: source: https://towardsdatascience.com/step-by-step-signal-processing-with-machine-learning-pca-ica-nmf-8de2f375c422'''
+    '''source: https://towardsdatascience.com/step-by-step-signal-processing-with-machine-learning-pca-ica-nmf-8de2f375c422'''
     images = []
     path_in = r'P:\ML\data'
     path_out = r'P:\ML\data\output'
