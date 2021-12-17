@@ -59,12 +59,6 @@ def main():
     '''The 2D figure show patterns in similar countries such as Yugoslavians, Baltic, Scandinavian 
     and the countries of the United Kingdom.'''
 
-    '''use Iris data'''
-    data = load_iris()
-    nmf = NMF(n_components=2, max_iter=1000, random_state=0, init='random', l1_ratio=0.1)
-    x = nmf.fit_transform(data)
-    print(nmf.inverse_transform(x[0]))
-
 
 if __name__ == '__main__':
     main()
