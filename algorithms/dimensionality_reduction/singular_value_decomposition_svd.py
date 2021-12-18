@@ -60,7 +60,6 @@ def main():
     print(svd.explained_variance_ratio_)
     print("sum of explained variance:")
     print(svd.explained_variance_ratio_.sum())
-
     print("Transformed Matrix after reducing to 2 features:")
     print(svd.fit_transform(A))
 
