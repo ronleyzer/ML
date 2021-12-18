@@ -1,3 +1,8 @@
+import numpy as np
+from sklearn.decomposition import TruncatedSVD
+from numpy import linalg as LA
+from numpy.linalg import eig
+
 def background():
     print('''Singular Value Decomposition (SVD) is a dimensionality reduction method.
     SVD allow to represent a large matrix A by 3 smaller matrices U, Σ and V.
@@ -25,8 +30,41 @@ def background():
 
 
 def main():
-    background()
+    '''*** simple implementation ***'''
+    '''create the basic matrix'''
+    A = np.array([[-1, 2, 0], [2, 0, -2], [0, -2, 1]])
+    print("Original Matrix:")
+    print(A)
+
+    '''In order to reduce the dimantions we need to find all zeros or close to zeros singular values.
+    Singular values of matrix A = eigenvalues of matrix A.T*A'''
+    A_2 = (A.T).dot(A)
+    eigenvalues_A2, eigenvectors_A2 = eig(A_2)
+    print("The eigen values of A transpose A:")
+    print(eigenvalues_A2)
+    singular_values_A = np.sqrt(eigenvalues_A2)
+    print("The singular values of matrix A:")
+    print(singular_values_A)
+    print('''python have numeric problem, the eigenvalues of matrix A.T*A are 9,0,9
+    therefore the singular values of matrix A are 3,0,3. The meaning is that the second singular value
+    is linearly dependent with another column and can be reduce without a great loss of information.''')
+
+    '''create the model'''
+    '''In TruncatedSVD class can be created in which you must specify the number 
+    of desirable features or components to select, e.g. 2. '''
+    svd = TruncatedSVD(n_components=2)
+    svd.fit_transform(A)
+    print("Singular values:")
+    print(svd.singular_values_)
+    print("explained variance:")
+    print(svd.explained_variance_ratio_)
+    print("sum of explained variance:")
+    print(svd.explained_variance_ratio_.sum())
+
+    print("Transformed Matrix after reducing to 2 features:")
+    print(svd.fit_transform(A))
 
 
 if __name__ == '__main__':
+    background()
     main()
