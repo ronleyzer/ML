@@ -1,8 +1,13 @@
+import sys
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-import os
 import scipy
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
 
 ''' this code is base on Androw Neg ML curs on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
@@ -10,13 +15,8 @@ https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anom
 '''
 
 
-def get_the_data():
-    path_in = r'P:\ML\data\anomaly_detection'
-    mat = loadmat(fr"{path_in}\ex8data1.mat")
-    # save the data in repo
-    # scipy.io.savemat('anomaly_two_features_and_target.mat', mat)
-    # f =  os.getcwd() + '/' + f"anomaly_two_features_and_target.mat"
-    # mat = loadmat(os.getcwd() + '/' + f"anomaly_two_features_and_target.mat")
+def get_the_data(path_in, file_name):
+    mat = loadmat(fr"{path_in}\{file_name}")
     X = mat["X"]
     yval = mat["yval"]
     return X, yval, mat
@@ -147,8 +147,8 @@ def split_train_cv_test_normal_and_anomaly(mat):
     return X_train, X_cv, X_test, y_train, y_cv, y_test
 
 
-def main():
-    X, yval, mat = get_the_data()
+def main(path_in, file_name):
+    X, yval, mat = get_the_data(path_in, file_name)
     plot_the_data(X)
     '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
     X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
@@ -173,4 +173,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    path_in = config_param_path_in()
+    file_name = r'\anomaly_detection\ex8data1.mat'
+    main(path_in, file_name)

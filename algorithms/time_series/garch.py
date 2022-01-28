@@ -92,8 +92,7 @@ def main():
     '''forecast the test set'''
     y_hat = model_fit.forecast(horizon=len(df_validation), reindex=True)
     new_index = list(range(len(df_train) - 1, len(df_train + df_validation) + 1))
-    forecast_variance = pd.DataFrame(index=new_index[:-1], data=y_hat.variance.values[-1, :])
-
+    forecast_variance = pd.DataFrame(index=new_index[1:-1], data=y_hat.variance.values[-1, :])
     actual_vs_predict_plot(forecast_variance, df_train, df_validation)
 
 

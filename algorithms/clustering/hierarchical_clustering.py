@@ -1,9 +1,15 @@
+import os
+import sys
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import normalize
 import scipy.cluster.hierarchy as shc
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
 
 '''
 •	This algorithm starts with all the data points assigned to a cluster of their own. 
@@ -13,9 +19,9 @@ https://www.analyticsvidhya.com/blog/2019/05/beginners-guide-hierarchical-cluste
 '''
 
 
-def main():
+def main(path_in, file_name):
     # get the data
-    data = pd.read_csv(r'P:\ML\data\Wholesale customers data.csv')
+    data = pd.read_csv(fr'{path_in}\{file_name}')
     # normalize
     data_scaled = normalize(data)
     data_scaled = pd.DataFrame(data_scaled, columns=data.columns)
@@ -40,4 +46,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    file_name = r'Wholesale_customers_data.csv'
+    path_in = config_param_path_in()
+    main(path_in, file_name)

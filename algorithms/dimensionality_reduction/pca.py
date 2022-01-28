@@ -1,9 +1,13 @@
+import os
+import sys
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn import datasets
 from sklearn.decomposition import PCA
 
+sys.path.append(os.getcwd())
 from algorithms.clustering.gmm_gaussian_mixture_model import standardize_and_normalize
 
 

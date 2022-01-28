@@ -1,12 +1,17 @@
+import sys
+import os
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble import IsolationForest
 
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
 
 '''Anomalies are patterns of different data within given data,
-    whereas Outliers would be merely extreme data points within data. 
-    the code used https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate code and data'''
+   whereas Outliers would be merely extreme data points within data. 
+   the code used https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate code and data'''
 
 
 def isolate_forest_simple(df):
@@ -43,11 +48,10 @@ def isolate_forest(df, subplots_rows, subplots_columns):
     return outliers, anomalies_score
 
 
-def main():
+def main(path_in, file_name):
     'Nonparametric methods: Univariate'
     'get the data'
-    df = pd.read_csv(fr'P:\ML\data\anomaly_detection\Melbourne_housing_FULL.csv', index_col=[0],
-                     parse_dates=[0], dayfirst=True)
+    df = pd.read_csv(fr'{path_in}\{file_name}', index_col=[0], parse_dates=[0], dayfirst=True)
     'clean'
     df.fillna(df.median(), inplace=True)
     'select only numeric data'
@@ -67,4 +71,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    path_in = config_param_path_in()
+    file_name = r'\anomaly_detection\Melbourne_housing_FULL.csv'
+    main(path_in, file_name)
