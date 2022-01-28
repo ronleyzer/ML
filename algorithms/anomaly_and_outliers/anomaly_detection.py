@@ -7,8 +7,7 @@ from scipy.io import loadmat
 import scipy
 
 sys.path.append(os.getcwd())
-from generic_fun.get_data import get_data_from_cmd
-from generic_fun.configuration_param import ArgumentParser
+from generic_fun.get_data import config_param_path_in
 
 ''' this code is base on Androw Neg ML curs on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
@@ -17,12 +16,7 @@ https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anom
 
 
 def get_the_data(path_in, file_name):
-    # path_in = r'P:\ML\data\anomaly_detection'
     mat = loadmat(fr"{path_in}\{file_name}")
-    # save the data in repo
-    # scipy.io.savemat('anomaly_two_features_and_target.mat', mat)
-    # f =  os.getcwd() + '/' + f"anomaly_two_features_and_target.mat"
-    # mat = loadmat(os.getcwd() + '/' + f"anomaly_two_features_and_target.mat")
     X = mat["X"]
     yval = mat["yval"]
     return X, yval, mat
@@ -179,14 +173,6 @@ def main(path_in, file_name):
 
 
 if __name__ == '__main__':
-    r'''define parameters configuration-
-    for example: --path_in "C:\Users\ronro\Desktop\data\anomaly_detection" '''
-    parser = ArgumentParser()
-    parser.add_argument('--path_in', type=str)
-    parser.add_argument('--file_name', default=r'\ex8data1.mat', type=str)
-    args = parser.parse_args()
-
-    path_in = args.path_in
-    file_name = args.file_name
-
+    path_in = config_param_path_in()
+    file_name = r'\anomaly_detection\ex8data1.mat'
     main(path_in, file_name)
