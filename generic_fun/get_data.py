@@ -7,9 +7,11 @@ def get_data_from_cmd(file_name: str, read_option: str = 'csv_time_series'):
     r'''
     this function take a string writen in cmd that includes the path to the code we like to run
     and the path to the local folder with the data, for example:
-    python ML\algorithms\dimensionality_reduction\pca.py C:\Users\ronro\Desktop\data\
+    python C:\Users\ronro\PycharmProjects\ML\algorithms\anomaly_and_outliers\anomaly_detection.py --path_in "C:\Users\
+    ronro\Desktop\data\anomaly_detection"
+
     :param file_name: file name or path, for example: \anomaly_detection\Melbourne_housing_FULL.csv
-    :param read_option: csv as default
+    :param read_option: csv_time_series as default
     :return: the data
     '''
     argv = sys.argv
