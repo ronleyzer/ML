@@ -1,6 +1,12 @@
+import os
+import sys
+
 import glob
 import cv2
 import numpy as np
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
 
 
 def ica(X, step_size=1, tol=1e-8, max_iter=10000, n_sources=4):
@@ -100,12 +106,10 @@ def nmf(X, tol=1e-6, max_iter=5000, n_components=4):
     return H
 
 
-def main():
+def main(path_in, file_name):
     '''source- https://towardsdatascience.com/step-by-step-signal-processing-with-machine-learning-pca-ica-nmf-8de2f375c422'''
     images = []
-    path_in = r'P:\ML\data'
-    path_out = r'P:\ML\data\output'
-    for path in glob.glob(fr"{path_in}\mixture_dataset(0147)/*.jpg"):
+    for path in glob.glob(fr"{path_in}\{file_name}/*.jpg"):
         images.append(cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2GRAY))
 
     # Reshape images to 1D arrays
@@ -125,4 +129,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    file_name = r'mixture_dataset(0147)'
+    path_in = config_param_path_in()
+    main(path_in, file_name)

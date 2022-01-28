@@ -1,3 +1,6 @@
+import os
+import sys
+
 import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -6,6 +9,9 @@ from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from algorithms.time_series.arima import split_time_series_to_train_validation_test
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
 
 
 def background():
@@ -31,7 +37,7 @@ def background():
              ''')
 
 
-def main():
+def main(path_in, file_name):
     '''
     This code is an implementation of Holt-Winters forecasting
     sources: https://medium.com/analytics-vidhya/python-code-on-holt-winters-forecasting-3843808a9873
@@ -39,9 +45,8 @@ def main():
     '''
 
     background()
-
     '''get the data'''
-    airline = pd.read_csv(r'P:\ML\data\international-airline-passengers.csv', index_col='Month', parse_dates=True)
+    airline = pd.read_csv(fr'{path_in}\{file_name}', index_col='Month', parse_dates=True)
     print(airline.shape)
 
     '''plotting the original data'''
@@ -114,9 +119,12 @@ def main():
     plt.show()
 
     '''Evaluation'''
-    print(f'Mean Absolute Error = {mean_absolute_error(test_airline, test_predictions)}')
-    print(f'Mean Squared Error = {mean_squared_error(test_airline, test_predictions)}')
+    test_data = test_airline['Thousands of Passengers']
+    print(f'Mean Absolute Error = {mean_absolute_error(test_data, test_predictions)}')
+    print(f'Mean Squared Error = {mean_squared_error(test_data, test_predictions)}')
 
 
 if __name__ == '__main__':
-    main()
+    file_name = r'international_airline_passengers.csv'
+    path_in = config_param_path_in()
+    main(path_in, file_name)

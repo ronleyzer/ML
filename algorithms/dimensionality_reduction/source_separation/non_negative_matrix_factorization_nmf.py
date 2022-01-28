@@ -1,9 +1,15 @@
+import os
+import sys
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import NMF
 from sklearn.datasets import load_iris
-from visualization import scatter_plot_with_text
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import config_param_path_in
+from generic_fun.visualization import scatter_plot_with_text
 
 
 def background():
@@ -27,12 +33,11 @@ def background():
              https://towardsdatascience.com/nmf-a-visual-explainer-and-python-implementation-7ecdd73491f8''')
 
 
-def main():
+def main(path_in, file_name):
     background()
 
     '''get the eurovision data data'''
-    path_in = r'P:\ML\data'
-    eurovision = pd.read_csv(fr"{path_in}\eurovision-2016.csv")
+    eurovision = pd.read_csv(fr"{path_in}\{file_name}")
 
     '''clean the data'''
     televote_Rank = eurovision.pivot(index='From country', columns='To country', values='Televote Rank')
@@ -61,4 +66,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    path_in = config_param_path_in()
+    file_name = r'eurovision-2016.csv'
+    main(path_in, file_name)
