@@ -1,24 +1,21 @@
 # ML
 
-Machine Learning Algorithms Implementation Project
+Machine Learning Algorithms Implementation Project.
 
 
+## Download the Data from GoogleDrive
 
-## Download the Data from DropBox
-
-Download the 'data' folder using the following link: [My_DropBox](https://drive.google.com/drive/folders/1TZEUK9i5qilALNlYgY9LT9cqOS_KJJQP/).
+Download the 'data' folder using the following link: [My_GoogleDrive](https://drive.google.com/drive/folders/1pohCzjaTY1ZTzqvKXm8KPB2pC6BEuovB).
 Put the data in a folder on your computer.
 
 ## Clone the Project
+Clone the project
 ```bash
-# In your PyCharm go to VCS -> Get from Version Control -> GitHub ->
-# Copy the path:
 https://github.com/ronleyzer/ML.git
-# Press Clone
 ```
 
 ## Installation
-
+I used Python 3.9.1 version to create this project.
 Use the terminal or command line to install the requirements.txt file.
 
 ```bash
