@@ -13,3 +13,10 @@ def config_param_path_in():
     args = parser.parse_args()
     path_in = args.path_in
     return path_in
+
+
+def get_data_from_cmd(file_name):
+    argv = sys.argv
+    path = os.path.join(argv[1], file_name)
+    data = pd.read_csv(path)
+    return data
