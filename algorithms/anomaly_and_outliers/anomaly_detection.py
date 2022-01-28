@@ -1,8 +1,13 @@
+import sys
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-import os
 import scipy
+
+sys.path.append(os.getcwd())
+from generic_fun.get_data import get_data_from_cmd
 from generic_fun.configuration_param import ArgumentParser
 
 ''' this code is base on Androw Neg ML curs on Coursera 
