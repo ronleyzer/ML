@@ -15,7 +15,7 @@ https://github.com/ronleyzer/ML.git
 ```
 
 ## Installation
-I used Python 3.9.1 version to create this project.
+I used Python 3.9.1 to create this project.
 Use the terminal or command line to install the requirements.txt file.
 
 ```bash
@@ -23,19 +23,21 @@ pip install -r requirements.txt
 ```
 
 ## Run the code
+Assuming that (for example):
+1. You are running anomaly_detection.py 
+2. The ML folder is in C:\Users\ronro\PycharmProjects
+3. The data folder is in C:\Users\ronro\Desktop
 
 First option   - Run the code using the command line- 
+Run the following command:
 ```python
-# Run <python path_to_code_file_you_want_to_run --path_in path_to_where_you_located_the_data_folder>
-# For example:
 python C:\Users\ronro\PycharmProjects\ML\algorithms\anomaly_and_outliers\anomaly_detection.py --path_in "C:\Users\ronro\Desktop\data"
-# TIP: the path to the code file you want to run can easeley copied using Ctrl+Shift+C when you are on that specific file.
 ```
 
-Secound option - Run the code using the configuration:
+Second option - Run the code using the configuration:
 ```python
 # Go to "Edit Configurations" in PyCharm
-# Add to the parameters the location of the data folder you just downloud <--path_in "path_to_where_you_located_the_data_folder">, for example:
+# Add to the parameters the location of the data folder you just downloaded
 --path_in "C:\Users\ronro\Desktop\data"
 # Then press Run
 ```
