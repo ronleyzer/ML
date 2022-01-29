@@ -18,7 +18,10 @@ def find_non_stationary_and_plot(df):
         of to many values to unpack- use np.squeeze()- same as in the line of check2
         """
         result = adfuller(df[feature].dropna())
-        pd.Series(df[feature]).plot(title=f'{feature}   P-Val={round(result[1], 3)}')
+        pd.Series(df[feature]).plot()
+        plt.suptitle('Time Series Data', fontsize=18)
+        plt.title(f'Adfuller P-Val={round(result[1], 3)}')
+        plt.grid()
         plt.show()
         plt.close()
         if result[1] > 0.05:
@@ -45,21 +48,25 @@ def examine_auto_correlation(df):
     fig, axes = plt.subplots(3, 2, sharex=True)
     axes[0, 0].plot(df.value)
     result = adfuller(df.value.dropna())
-    axes[0, 0].set_title(f'Original Series P-value: {np.round(result[1],3)}')
+    axes[0, 0].set_title(f'Original Series\nAdfuller P-value: {np.round(result[1],3)}')
     plot_acf(df.value, ax=axes[0, 1], lags=np.arange(1, df.value.shape[0]))
+    axes[0,0].grid()
 
     # 1st Differencing
     axes[1, 0].plot(df.value.diff())
     result = adfuller(df.value.diff().dropna())
-    axes[1, 0].set_title(f'1st Order Differencing P-value: {np.round(result[1],3)}')
+    axes[1, 0].set_title(f'1st Order Differencing\nAdfuller P-value: {np.round(result[1],3)}')
     plot_acf(df.value.diff().dropna(), ax=axes[1, 1], lags=np.arange(1, df.value.diff().shape[0]-1))
+    axes[1, 0].grid()
 
     # 2nd Differencing
     axes[2, 0].plot(df.value.diff().diff())
     result = adfuller(df.value.diff().diff().dropna())
-    axes[2, 0].set_title(f'2nd Order Differencing P-value: {np.round(result[1],3)}')
+    axes[2, 0].set_title(f'2nd Order Differencing\nAdfuller P-value: {np.round(result[1],3)}')
     plot_acf(df.value.diff().diff().dropna(), ax=axes[2, 1], lags=np.arange(1, df.value.diff().diff().shape[0]-2))
+    axes[2, 0].grid()
 
+    plt.tight_layout()
     plt.show()
 
 
@@ -96,12 +103,15 @@ def residual_plot(model_fit):
 def actual_vs_predict_plot(model_fit, df_validation, steps, alpha, order):
     '''Actual vs Fitted'''
     '''forecast'''
+    # add the last sample of the validation to train - avoid gap
+    model_fit.data.endog = np.append(model_fit.data.endog, df_validation.iloc[0, 0])
     forecast = model_fit.forecast(steps=steps, alpha=alpha)
     fc_series = pd.Series(forecast, index=df_validation.index).fillna(model_fit.data.endog[-1])
     plt.plot(np.squeeze(fc_series), label='forecast', color='r')
     plt.plot(model_fit.data.endog, label='training')
     plt.plot(df_validation, label='actual')
-    plt.title(f'Forecast vs Actual ARIMA params: AR={order[0]}, target_diff={order[1]}, MA={order[1]}')
+    plt.title(f'Forecast vs Actual ARIMA\nparams: AR={order[0]}, target_diff={order[1]}, MA={order[1]}')
+    plt.grid()
     plt.legend(loc='upper left', fontsize=8)
     plt.show()
 

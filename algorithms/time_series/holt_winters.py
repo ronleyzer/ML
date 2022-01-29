@@ -4,10 +4,9 @@ import sys
 import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from algorithms.time_series.arima import split_time_series_to_train_validation_test
+from algorithms.time_series.arima.arima import split_time_series_to_train_validation_test
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 sys.path.append(os.getcwd())
