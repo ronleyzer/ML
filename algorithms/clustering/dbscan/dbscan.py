@@ -100,7 +100,7 @@ def main():
 
     # DBSCAN defaults: epsilon is 0.5, and min_samples or minPoints is 5.
     dbscan(df)
-    plot_the_data(df, 'DBSCAN Clustering', c=df['DBSCAN_labels'], cmap=matplotlib.colors.ListedColormap(color_pallet))
+    plot_the_data(df, 'DBSCAN Clustering\n(before optimizing the epsilon parameter)', c=df['DBSCAN_labels'], cmap=matplotlib.colors.ListedColormap(color_pallet))
     '''All the data points are treated as noise. It is because the value of epsilon is very small.
     Lets optimize epsilon and minPoints and then train our model again.'''
     # optimize epsilon using the K-distance graph
@@ -109,6 +109,7 @@ def main():
     The optimum value of epsilon is at the point of maximum curvature in the K-Distance Graph, which is 30 in this case.
     '''
     distances = nearest_neighbors(df)
+    plot_k_distance(distances)
     plot_k_distance(distances)
     ''' The value of minPoints depends on domain knowledge'''
     dbscan(df, eps=30, min_samples=6)
