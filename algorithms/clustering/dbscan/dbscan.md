@@ -23,3 +23,7 @@ If the value of epsilon chosen is too small then a higher number of clusters wil
 ![Screenshot](output/6.JPG)
 The final result of the algorithm ability to cluster and label noise is impressive.
 ![Screenshot](output/7.JPG)
+
+Sources:
+[analyticsvidhya](https://www.analyticsvidhya.com/blog/2020/09/how-dbscan-clustering-works/),
+[analyticsvidhya](https://www.analyticsvidhya.com/blog/2016/11/an-introduction-to-clustering-and-different-methods-of-clustering/).
