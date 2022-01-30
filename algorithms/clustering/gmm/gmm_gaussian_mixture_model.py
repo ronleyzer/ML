@@ -23,13 +23,15 @@ def create_gmm(X, n_components, random_state):
     return labels, gmm
 
 
-def visualize_gmm(labels, X):
+def visualize_gmm(labels, X, title):
     plt.scatter(X.iloc[:, 0], X.iloc[:, 1], c=labels, s=40, cmap='viridis')
+    plt.title(f'{title}')
     plt.show()
 
 
-def visualize_data(X):
+def visualize_data(X, relevant_title):
     plt.scatter(X.iloc[:, 0], X.iloc[:, 1])
+    plt.title(f'{relevant_title}')
     plt.show()
 
 
@@ -52,7 +54,7 @@ def draw_ellipse(position, covariance, ax=None, **kwargs):
                              angle, **kwargs))
 
 
-def plot_gmm(labels, gmm, X, label=True, ax=None):
+def plot_gmm(title, labels, gmm, X, label=True, ax=None):
     ax = ax or plt.gca()
     # labels = gmm.fit(X).predict(X)
     if label:
@@ -64,16 +66,18 @@ def plot_gmm(labels, gmm, X, label=True, ax=None):
     w_factor = 0.2 / gmm.weights_.max()
     for pos, covar, w in zip(gmm.means_, gmm.covariances_, gmm.weights_):
         draw_ellipse(pos, covar, alpha=w * w_factor)
+    plt.title(title)
     plt.show()
 
 
 def plot_silhouette_scores(n_clusters, silhouette_scores):
     fig = plt.figure()
     plt.plot(n_clusters, silhouette_scores, 'bo-', color='black')
-    fig.tight_layout()
     plt.xlabel('N. of clusters')
     plt.ylabel('Silhouette Score')
-    plt.title('Identify the number of clusters using Silhouette Score')
+    plt.title('Silhouette Score\n(by number of clusters)')
+    plt.tight_layout()
+    fig.tight_layout()
     plt.show()
 
 
@@ -107,13 +111,6 @@ def standardize_and_normalize(X):
     return normalized_df
 
 
-def plot_time_series(X, labels, df):
-    X['label'] = labels
-    X.index = df.index
-    sns.scatterplot(data=X, x=X.index, y=X.iloc[:, 0], hue='label')
-    plt.show()
-
-
 def add_target(X):
     X['SNP Compounded'] = (pd.read_csv(r'P:\ML\kaggle\clustering\td_risk_y.csv', index_col=[0],
                                        parse_dates=[0], dayfirst=True).loc['2002-01-01':'2019-01-01']).iloc[:, 0]
@@ -122,46 +119,33 @@ def add_target(X):
     plt.show()
 
 
-def main(random_state, selected_component, time_series):
+def main(random_state, selected_component):
     # Generate some data
     df = generate_data()
     X = df.copy()
     X = pd.DataFrame(data=X)
     X = standardize_and_normalize(X)
-    # if time series, visualize over time
-    if time_series:
-        # PCA
-        X = pca(X, n_components=1)
-        # decide how many components using silhouette score
-        n_clusters = range(2, 9)
-        silhouette_score = silhouette_scores(X, n_clusters, random_state)
-        plot_silhouette_scores(n_clusters, silhouette_score)
-        # Generalizing E–M: Gaussian Mixture Models
-        labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
-        plot_time_series(X, labels, df)
-        # add "target"
-        add_target(X)
 
-    else:
-        # PCA
-        X = pca(X, n_components=2)
-        # visualize raw data
-        visualize_data(X)
-        # decide how many components using silhouette score
-        n_clusters = range(2, 9)
-        silhouette_score = silhouette_scores(X, n_clusters, random_state)
-        plot_silhouette_scores(n_clusters, silhouette_score)
-        # Generalizing E–M: Gaussian Mixture Models
-        labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
-        # visualize after GMM
-        visualize_gmm(labels, X)
-        plot_gmm(labels, gmm, X, label=True, ax=None)
+    # PCA
+    X = pca(X, n_components=2)
+    # visualize raw data
+    title = 'Iris Data After Dimensionality Reduction\n(PCA with 2 components)'
+    visualize_data(X, title)
+    # decide how many components using silhouette score
+    n_clusters = range(2, 9)
+    silhouette_score = silhouette_scores(X, n_clusters, random_state)
+    plot_silhouette_scores(n_clusters, silhouette_score)
+    # Generalizing E–M: Gaussian Mixture Models
+    labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
+    # visualize after GMM
+    title = 'Iris Data Clustered with GMM'
+    visualize_gmm(labels, X, title)
+    plot_gmm(title, labels, gmm, X, label=True, ax=None)
 
 
 if __name__ == '__main__':
     random_state = 42
     selected_component = 3
-    time_series = False
-    main(random_state, selected_component, time_series)
+    main(random_state, selected_component)
 
 
