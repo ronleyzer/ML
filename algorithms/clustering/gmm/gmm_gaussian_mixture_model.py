@@ -12,17 +12,8 @@ from sklearn.preprocessing import StandardScaler, normalize
 
 
 def generate_data():
-    if time_series:
-        # regime change td
-        X = pd.read_csv(r'P:\ML\kaggle\clustering\td_risk.csv', index_col=[0], parse_dates=[0],
-                        dayfirst=True).loc['2002-01-01':'2019-01-01']
-    else:
-        # # Generate some data
-        # X, y_true = make_blobs(n_samples=400, centers=4,
-        #                        cluster_std=0.60, random_state=0)
-        # X = X[:, ::-1]  # flip axes for better plotting
-        # Iris data
-        X, y = datasets.load_iris(return_X_y=True)
+    # Iris data
+    X, y = datasets.load_iris(return_X_y=True)
     return X
 
 
