@@ -49,7 +49,8 @@ def main(path_in, file_name):
     print(airline.shape)
 
     '''plotting the original data'''
-    airline[['Thousands of Passengers']].plot(title='Passengers Data')
+    airline[['Thousands of Passengers']].plot(title='Passenger Data')
+    plt.grid()
     plt.show()
 
     '''decomposing the Time Series
@@ -75,8 +76,11 @@ def main(path_in, file_name):
     Double HWES can as well consider data with trends and Triple HWES can even handle Seasonality.'''
 
     '''Single Exponential Smoothing'''
-    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).fit(smoothing_level=alpha, optimized=False, use_brute=True).fittedvalues
+    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).fit(smoothing_level=alpha,
+                                                                                  optimized=False,
+                                                                                  use_brute=True).fittedvalues
     airline[['Thousands of Passengers', 'HWES1']].plot(title='Holt Winters Single Exponential Smoothing')
+    plt.grid()
     plt.show()
     '''As expected, it didn’t fit quite well, because single ES doesnt work for data with Trends and Seasonality.'''
 
@@ -85,6 +89,7 @@ def main(path_in, file_name):
     airline['HWES2_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul').fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES2_ADD', 'HWES2_MUL']].plot(
         title='Holt Winters Double Exponential Smoothing: Additive and Multiplicative Trend')
+    plt.grid()
     plt.show()
     '''the fit looks better, but since we know there is Seasonality, we shall move into Triple'''
 
@@ -95,6 +100,7 @@ def main(path_in, file_name):
                                                 seasonal_periods=12).fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES3_ADD', 'HWES3_MUL']].plot(
         title='Holt Winters Triple Exponential Smoothing: Additive and Multiplicative Seasonality')
+    plt.grid()
     plt.show()
     '''looks promising!'''
 
@@ -106,15 +112,21 @@ def main(path_in, file_name):
     fitted_model = ExponentialSmoothing(train_airline['Thousands of Passengers'], trend='mul', seasonal='mul',
                                         seasonal_periods=12).fit()
     test_predictions = fitted_model.forecast(len(test_airline))
-    train_airline['Thousands of Passengers'].plot(legend=True, label='TRAIN')
+    # add the first sample in the prediction to the last in the train so there won't be a gap in the plot
+    train_airline_last = pd.DataFrame(test_airline.iloc[0, :])
+    frames = [train_airline, train_airline_last.T]
+    train_airline_1 = pd.concat(frames)
+    train_airline_1['Thousands of Passengers'].plot(legend=True, label='TRAIN')
     test_airline['Thousands of Passengers'].plot(legend=True, label='TEST', figsize=(6, 4))
     test_predictions.plot(legend=True, label='PREDICTION')
     plt.title('Train, Test and Predicted Test using Holt Winters')
+    plt.grid()
     plt.show()
 
     '''plot predict'''
     test_airline[['Thousands of Passengers']].plot(legend=True, label='TEST', figsize=(9, 6))
-    test_predictions.plot(legend=True, label='PREDICTION')
+    test_predictions.plot(title='Test Period',legend=True, label='PREDICTION')
+    plt.grid()
     plt.show()
 
     '''Evaluation'''
