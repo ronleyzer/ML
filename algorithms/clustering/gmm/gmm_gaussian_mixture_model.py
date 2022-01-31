@@ -11,7 +11,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, normalize
 
 
-def generate_data():
+def get_the_data():
     # Iris data
     X, y = datasets.load_iris(return_X_y=True)
     return X
@@ -56,7 +56,6 @@ def draw_ellipse(position, covariance, ax=None, **kwargs):
 
 def plot_gmm(title, labels, gmm, X, label=True, ax=None):
     ax = ax or plt.gca()
-    # labels = gmm.fit(X).predict(X)
     if label:
         ax.scatter(X.iloc[:, 0], X.iloc[:, 1], c=labels, s=40, cmap='viridis', zorder=2)
     else:
@@ -84,30 +83,27 @@ def plot_silhouette_scores(n_clusters, silhouette_scores):
 def silhouette_scores(X, n_clusters, random_state):
     silhouette_score = []
     for k in n_clusters:
-        # Set the model and its parameters
+        '''Set the model and its parameters'''
         labels, gmm = create_gmm(X, n_components=k, random_state=random_state)
-        # Calculate Silhoutte Score and append to a list
+        '''Calculate Silhoutte Score and append to a list'''
         silhouette_score.append(metrics.silhouette_score(X, labels, metric='euclidean'))
     return silhouette_score
 
 
 def pca(df, n_components):
-    # Reducing the dimensions of the data
+    '''Reducing the dimensions of the data'''
     pca = PCA(n_components=n_components)
     pca_df = pca.fit_transform(df)
     pca_df = pd.DataFrame(pca_df)
-    # pca_df.columns = ['P1', 'P2']
     return pca_df
 
 
 def standardize_and_normalize(X):
-    # Standardize data
+    '''Standardize data'''
     scaler = StandardScaler()
     scaled_df = scaler.fit_transform(X)
-    # Normalizing the Data
+    '''Normalizing the Data'''
     normalized_df = normalize(scaled_df)
-    # # Converting the numpy array into a pandas DataFrame
-    # normalized_df = pd.DataFrame(normalized_df)
     return normalized_df
 
 
@@ -120,24 +116,23 @@ def add_target(X):
 
 
 def main(random_state, selected_component):
-    # Generate some data
-    df = generate_data()
-    X = df.copy()
-    X = pd.DataFrame(data=X)
+    '''get the data'''
+    mat = get_the_data()
+    X = pd.DataFrame(data=mat)
     X = standardize_and_normalize(X)
-
-    # PCA
+    '''PCA'''
     X = pca(X, n_components=2)
-    # visualize raw data
+
+    '''visualize raw data'''
     title = 'Iris Data After Dimensionality Reduction\n(PCA with 2 components)'
     visualize_data(X, title)
-    # decide how many components using silhouette score
+    '''choose the number of components using silhouette score'''
     n_clusters = range(2, 9)
     silhouette_score = silhouette_scores(X, n_clusters, random_state)
     plot_silhouette_scores(n_clusters, silhouette_score)
-    # Generalizing E–M: Gaussian Mixture Models
+    '''generalizing E–M: Gaussian Mixture Models'''
     labels, gmm = create_gmm(X, n_components=selected_component, random_state=random_state)
-    # visualize after GMM
+    '''visualize after GMM'''
     title = 'Iris Data Clustered with GMM'
     visualize_gmm(labels, X, title)
     plot_gmm(title, labels, gmm, X, label=True, ax=None)
