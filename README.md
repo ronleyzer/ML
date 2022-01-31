@@ -1,10 +1,10 @@
 # ML
-
-Machine Learning Algorithms Implementation Project.
-
+###Machine Learning Algorithms Implementation Project.
+This project present a few ML algorithms I implemented.
+The motivation to this project is self learning and dipper understanding of the algorithms,
+as part of professional development.
 
 ## Download the Data from GoogleDrive
-
 Download the 'data' folder using the following link: [My_GoogleDrive](https://drive.google.com/drive/folders/1pohCzjaTY1ZTzqvKXm8KPB2pC6BEuovB).
 Put the data in a folder on your computer.
 

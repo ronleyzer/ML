@@ -15,6 +15,7 @@ https://www.machinelearningplus.com/time-series/arima-model-time-series-forecast
 https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/
 '''
 
+
 def find_non_stationary_and_plot(df):
     non_stationary = []
     for feature in df.columns:
@@ -125,7 +126,7 @@ def split_time_series_to_train_validation_test(df, split_pct):
     number_of_samples = len(df)
     num_of_observation_in_train = int(np.round(split_pct['train']*number_of_samples, 0))
     num_of_observation_in_validation = int(np.round(split_pct['validation']*number_of_samples, 0))
-    '''Create Training and Test'''
+    '''create training and test'''
     train = pd.DataFrame(df[:(num_of_observation_in_train)])
     validation = pd.DataFrame(df[num_of_observation_in_train:
                                        (num_of_observation_in_train+num_of_observation_in_validation)])
@@ -140,16 +141,14 @@ def auto_correlation(selected_diff):
 
 
 def main():
-
+    '''get the data'''
     df = get_the_data(path='https://raw.githubusercontent.com/selva86/datasets/master/wwwusage.csv')
     split_pct = {'train': 0.6, 'validation': 0.2, 'test': 0.2}
     df, df_validation, df_test = split_time_series_to_train_validation_test(df, split_pct)
 
-    '''A. test stationary and diff the series till it stat - 
-    differencing needed only if the series is non-stationary
-    null hypothesis of the adfuller test is that the time series is non-stationary. 
-    So, if the p-value of the test is less than the significance level (0.05) 
-    then you reject the null hypothesis and infer that the time series is indeed stationary.
+    '''A. test if the series is stationary, and iteratively differentiate the series till it is stationary.
+    the null hypothesis of the adfuller test is that the time series is non-stationary. 
+    therefore, if the p-value of the test is less than the significance level (0.05) the null hypothesis is rejected.
     A.1 test stat'''
     non_stationary, result = find_non_stationary_and_plot(df)
     print('ADF Statistic: %f' % result[0])
