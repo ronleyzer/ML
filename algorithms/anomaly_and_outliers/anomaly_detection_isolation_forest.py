@@ -9,9 +9,7 @@ from sklearn.ensemble import IsolationForest
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
-'''Anomalies are patterns of different data within given data,
-   whereas Outliers would be merely extreme data points within data. 
-   the code used https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate code and data'''
+'''the code is based on https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate'''
 
 
 def isolate_forest_simple(df):
@@ -22,7 +20,7 @@ def isolate_forest_simple(df):
 
 
 def isolate_forest(df, subplots_rows):
-    '''
+    """
     The function plots the isolation forest scores of the data.
 
     The Isolation Forest score is the anomaly score of each sample.
@@ -31,7 +29,7 @@ def isolate_forest(df, subplots_rows):
     to isolate a sample is equivalent to the path length from the root node to the terminating node.
     This path length, averaged over a forest of such random trees, is a measure of normality. When a forest of random
     trees collectively produces shorter path lengths for particular samples, they are highly likely to be anomalies.
-    We set 0 as the threshold value for outliers.'''
+    We set 0 as the threshold value for outliers."""
 
     '''plot related functionality'''
     fig, axs = plt.subplots(subplots_rows, len(df.columns), figsize=(14, 8), facecolor='w', edgecolor='k')

@@ -4,12 +4,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-import scipy
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
-''' this code is base on Androw Neg ML curs on Coursera 
+''' this code is base on Androw Ng ML curs on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
 https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anomaly-detection-1233d23dba95
 '''
@@ -38,11 +37,10 @@ def estimate_gaussian(X):
      This function estimates the parameters of a Gaussian distribution using the data in X
     """
     m = X.shape[0]
-    # compute the mean for each feature
-    sum_ = np.sum(X, axis=0)
-    mu = 1 / m * sum_
-    # compute the variances for each feature
-    var = 1 / m * np.sum((X - mu) ** 2, axis=0)
+    '''compute the mean for each feature'''
+    mu = (1 / m) * np.sum(X, axis=0)
+    '''compute the variances for each feature'''
+    var = (1 / m) * np.sum((X - mu) ** 2, axis=0)
     return mu, var
 
 
@@ -113,28 +111,28 @@ def plot_optimal_threshold(X, epsilon, p, title):
 
 
 def split_train_cv_test_normal_and_anomaly(mat):
-    '''
-    this function take ndarray of the data, split to normal and non-normal and split the data so
-    that train gets 60% of the normal samples, cv and test each gets 20% of normals, and 50% of anomaly samples
+    """
+    this function takes an ndarray of the data, splits the labels to normal and non-normal, and splits the data so
+    that the training sample gets 60% of the normal samples, and cv and test get 20% of normals,
+    and 50% of the anomaly samples
     :param mat: dict data with target
-    :return:
-    '''
+    :return: split data samples: X_train, X_cv, X_test, y_train, y_cv, y_test
+    """
 
+    '''create a feature dataset and a label dataset'''
     X = mat["Xval"]
     y = mat["yval"]
-
+    '''distinguish normal and anomaly samples'''
     normal = np.squeeze(mat["yval"] == 0)
     anomaly = np.squeeze(mat["yval"] == 1)
-
     X_normal = X[normal]
     X_anomaly = X[anomaly]
     y_normal = y[normal]
     y_anomaly = y[anomaly]
-
+    '''randomly split the samples of normal and anomaly between training CV and test'''
     np.random.seed(111)
     uniform_dis_normal = (np.random.uniform(size=len(X_normal)))[:, np.newaxis]
     uniform_dis_anomaly = (np.random.uniform(size=len(X_anomaly)))[:, np.newaxis]
-
     X_train = X_normal[np.squeeze(uniform_dis_normal <= 0.6)]
     X_cv = np.append(X_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
                      X_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
@@ -151,15 +149,13 @@ def split_train_cv_test_normal_and_anomaly(mat):
 
 
 def main(path_in, file_name):
+    '''get the data'''
     X, yval, mat = get_the_data(path_in, file_name)
     plot_the_data(X, 'The Data')
-    '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
+    '''split the data to train, cross-validation and test. save all anomalies to cross validation and test periods'''
     X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
-    '''estimate parameters (mean and variance) for the Gaussian model'''
+    '''estimate parameters (mean and variance) for the Gaussian model for training only'''
     mu, sigma2 = estimate_gaussian(X_train)
-    '''Now that you have estimated the Gaussian parameters, you can investigate
-       which examples have a very high probability given this distribution and which
-       examples have a very low probability.'''
     '''for every sample compute its product of probability-density-functions over all the features 
     The low probability examples are more likely to be the anomalies in our dataset.'''
     pval = multivariate_gaussian(X_cv, mu, sigma2)

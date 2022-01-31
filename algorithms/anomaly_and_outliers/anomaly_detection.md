@@ -33,4 +33,5 @@ The Isolation Forest return the anomaly score of each sample. The IsolationFores
 ![Screenshot](output/5.JPG)
 
 Sources: [kaggle](https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate),
-[coursera](https://www.coursera.org/learn/machine-learning/programming/fyhXS/anomaly-detection-and-recommender-systems/instructions).
+[coursera](https://www.coursera.org/learn/machine-learning/programming/fyhXS/anomaly-detection-and-recommender-systems/instructions),
+[towardsdatascience](https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anomaly-detection-1233d23dba95).
