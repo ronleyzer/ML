@@ -7,11 +7,8 @@ from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.neighbors import NearestNeighbors
 
 '''
-Motivation: K-Means and Hierarchical Clustering both fail in creating clusters of arbitrary shapes. 
-They are not able to form clusters based on varying densities. That’s why we need DBSCAN clustering.
-•	DBSCAN is not just able to cluster the data points correctly, but it also perfectly detects noise in the dataset.
-•	DBSCAN is robust to outliers.
-•	It does not require the number of clusters to be told beforehand.
+the code is based on
+https://www.analyticsvidhya.com/blog/2020/09/how-dbscan-clustering-works/,
 '''
 
 

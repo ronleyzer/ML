@@ -9,6 +9,11 @@ from statsmodels.tsa.arima.model import ARIMA
 from pandas.plotting import autocorrelation_plot
 plt.rcParams.update({'figure.figsize': (9, 7), 'figure.dpi': 120})
 
+'''
+the code is based on
+https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/ ,
+https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/
+'''
 
 def find_non_stationary_and_plot(df):
     non_stationary = []
@@ -135,12 +140,7 @@ def auto_correlation(selected_diff):
 
 
 def main():
-    '''
-    ARIMA model
-    based on: https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/ ,
-    https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/
-    :return:
-    '''
+
     df = get_the_data(path='https://raw.githubusercontent.com/selva86/datasets/master/wwwusage.csv')
     split_pct = {'train': 0.6, 'validation': 0.2, 'test': 0.2}
     df, df_validation, df_test = split_time_series_to_train_validation_test(df, split_pct)

@@ -10,6 +10,13 @@ from sklearn import datasets
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, normalize
 
+'''
+the code is based on
+https://towardsdatascience.com/gmm-gaussian-mixture-models-how-to-successfully-use-it-to-cluster-your-data-891dc8ac058f
+https://www.kaggle.com/vipulgandhi/gaussian-mixture-models-clustering-explained/notebook
+https://jakevdp.github.io/PythonDataScienceHandbook/05.12-gaussian-mixtures.html
+'''
+
 
 def get_the_data():
     # Iris data
