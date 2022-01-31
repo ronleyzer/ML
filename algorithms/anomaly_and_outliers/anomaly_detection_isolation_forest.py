@@ -2,180 +2,87 @@ import sys
 import os
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.io import loadmat
-import scipy
+from sklearn.ensemble import IsolationForest
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
-''' this code is base on Androw Neg ML curs on Coursera 
-https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
-https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anomaly-detection-1233d23dba95
-'''
+'''Anomalies are patterns of different data within given data,
+   whereas Outliers would be merely extreme data points within data. 
+   the code used https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate code and data'''
 
 
-def get_the_data(path_in, file_name):
-    mat = loadmat(fr"{path_in}\{file_name}")
-    X = mat["X"]
-    yval = mat["yval"]
-    return X, yval, mat
+def isolate_forest_simple(df):
+    for i, column in enumerate(df.columns.tolist()):
+        isolation_forest = IsolationForest(contamination='auto', random_state=111)
+        isolation_forest.fit(df[column].values.reshape(-1, 1))
+    return isolation_forest.predict(df[column].values.reshape(-1, 1))
 
 
-def plot_the_data(X, title):
-    plt.scatter(X[:, 0], X[:, 1], marker="x")
-    plt.xlim(0, 30)
-    plt.ylim(0, 30)
-    plt.xlabel("Latency (ms)")
-    plt.ylabel("Throughput (mb/s)")
-    plt.title(f'{title}')
-    plt.grid()
-    plt.show()
-
-
-def estimate_gaussian(X):
-    """
-     This function estimates the parameters of a Gaussian distribution using the data in X
-    """
-    m = X.shape[0]
-    # compute the mean for each feature
-    sum_ = np.sum(X, axis=0)
-    mu = 1 / m * sum_
-    # compute the variances for each feature
-    var = 1 / m * np.sum((X - mu) ** 2, axis=0)
-    return mu, var
-
-
-def multivariate_gaussian(X, mu, sigma2):
-    """
-    Computes the probability density function of the multivariate gaussian distribution.
-    """
-    k = len(mu)
-    sigma2 = np.diag(sigma2)
-    X = X - mu.T
-    p = 1 / ((2 * np.pi) ** (k / 2) * (np.linalg.det(sigma2) ** 0.5)) * np.exp(
-        -0.5 * np.sum(X @ np.linalg.pinv(sigma2) * X, axis=1))
-    return p
-
-
-def select_threshold(yval, pval):
-    """
-    Find the best threshold (epsilon) to use for selecting outliers
-    """
-    best_epi = 0
-    best_F1 = 0
-
-    stepsize = (max(pval) - min(pval)) / 1000
-    epi_range = np.arange(pval.min(), pval.max(), stepsize)
-    for epi in epi_range:
-        '''true positive. false positive, false negative'''
-        '''the label y = 1 corresponds to an anomalous example, and y = 0 corresponds to a normal example'''
-        predictions = (pval < epi)[:, np.newaxis]
-        tp = np.sum(predictions[yval == 1] == 1)
-        fp = np.sum(predictions[yval == 0] == 1)
-        fn = np.sum(predictions[yval == 1] == 0)
-
-        # compute precision, recall and F1
-        if tp+fp == 0:
-            prec = 0
-        else:
-            prec = tp / (tp + fp)
-        if tp+fn == 0:
-            rec = 0
-        else:
-            rec = tp / (tp + fn)
-
-        if prec+rec == 0:
-            F1 = 0
-        else:
-            F1 = (2 * prec * rec) / (prec + rec)
-
-        if F1 > best_F1:
-            best_F1 = F1
-            best_epi = epi
-
-    return best_epi, best_F1
-
-
-def plot_optimal_threshold(X, epsilon, p, title):
-    plt.figure(figsize=(8, 6))
-    # plot the data
-    plt.scatter(X[:, 0], X[:, 1], marker="x")
-    outliers = np.nonzero(p < epsilon)[0]
-    plt.scatter(X[outliers, 0], X[outliers, 1], marker="o", facecolor="none", edgecolor="r", s=70)
-    plt.xlim(0, 35)
-    plt.ylim(0, 35)
-    plt.xlabel("Latency (ms)")
-    plt.ylabel("Throughput (mb/s)")
-    plt.title(f"{title}")
-    plt.grid()
-    plt.show()
-
-
-def split_train_cv_test_normal_and_anomaly(mat):
+def isolate_forest(df, subplots_rows):
     '''
-    this function take ndarray of the data, split to normal and non-normal and split the data so
-    that train gets 60% of the normal samples, cv and test each gets 20% of normals, and 50% of anomaly samples
-    :param mat: dict data with target
-    :return:
-    '''
+    The function plots the isolation forest scores of the data.
 
-    X = mat["Xval"]
-    y = mat["yval"]
+    The Isolation Forest score is the anomaly score of each sample.
+    The IsolationForest 'isolates' observations by randomly selecting a feature and then randomly selecting a
+    split value between the maximum and minimum values of the selected feature. The number of splittings required
+    to isolate a sample is equivalent to the path length from the root node to the terminating node.
+    This path length, averaged over a forest of such random trees, is a measure of normality. When a forest of random
+    trees collectively produces shorter path lengths for particular samples, they are highly likely to be anomalies.
+    We set 0 as the threshold value for outliers.'''
 
-    normal = np.squeeze(mat["yval"] == 0)
-    anomaly = np.squeeze(mat["yval"] == 1)
+    '''plot related functionality'''
+    fig, axs = plt.subplots(subplots_rows, len(df.columns), figsize=(14, 8), facecolor='w', edgecolor='k')
+    axs = axs.ravel()
+    fig.suptitle("Isolation Forest - Anomaly Score")
 
-    X_normal = X[normal]
-    X_anomaly = X[anomaly]
-    y_normal = y[normal]
-    y_anomaly = y[anomaly]
+    '''give each sample an anomaly score, and determine if it is an outlier (-1 for outlier, else 1)'''
+    cols = df.columns.tolist()
+    outliers = {}
+    anomaly_scores = {}
+    for i, column in enumerate(cols):
+        isolation_forest = IsolationForest(random_state=111)
+        isolation_forest.fit(df[column].values.reshape(-1, 1))
+        xx = np.linspace(df[column].min(), df[column].max(), len(df)).reshape(-1, 1)
+        anomaly_score = isolation_forest.decision_function(xx)
+        outlier = isolation_forest.predict(xx)
 
-    np.random.seed(111)
-    uniform_dis_normal = (np.random.uniform(size=len(X_normal)))[:, np.newaxis]
-    uniform_dis_anomaly = (np.random.uniform(size=len(X_anomaly)))[:, np.newaxis]
+        outliers[column] = outlier
+        anomaly_scores[column] = anomaly_score
 
-    X_train = X_normal[np.squeeze(uniform_dis_normal <= 0.6)]
-    X_cv = np.append(X_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
-                     X_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
-    X_test = np.append(X_normal[np.squeeze(uniform_dis_normal > 0.8)],
-                       X_anomaly[np.squeeze(uniform_dis_anomaly > 0.5)], axis=0)
-
-    y_train = y_normal[np.squeeze(uniform_dis_normal <= 0.6)]
-    y_cv = np.append(y_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
-                     y_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
-    y_test = np.append(y_normal[np.squeeze(uniform_dis_normal > 0.8)],
-                       y_anomaly[np.squeeze(uniform_dis_anomaly > 0.5)], axis=0)
-
-    return X_train, X_cv, X_test, y_train, y_cv, y_test
+        axs[i].plot(xx, anomaly_score, label='anomaly score')
+        axs[i].fill_between(xx.T[0], np.min(anomaly_score), np.max(anomaly_score),
+                            where=outlier == -1, color='r',
+                            alpha=.4, label='outlier region')
+        axs[i].legend()
+        axs[i].set_title(column)
+    plt.tight_layout()
+    fig.tight_layout()
+    plt.show()
 
 
 def main(path_in, file_name):
-    X, yval, mat = get_the_data(path_in, file_name)
-    plot_the_data(X, 'The Data')
-    '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
-    X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
-    '''estimate parameters (mean and variance) for the Gaussian model'''
-    mu, sigma2 = estimate_gaussian(X_train)
-    '''Now that you have estimated the Gaussian parameters, you can investigate
-       which examples have a very high probability given this distribution and which
-       examples have a very low probability.'''
-    '''for every sample compute its product of probability-density-functions over all the features 
-    The low probability examples are more likely to be the anomalies in our dataset.'''
-    pval = multivariate_gaussian(X_cv, mu, sigma2)
-    '''select threshold - One way to determine which
-        examples are anomalies is to select the threshold ε using the F1 score on a cross validation set.'''
-    epsilon, F1 = select_threshold(y_cv, pval)
-    print("Best epsilon found using cross-validation:", epsilon)
-    print("Best F1 on Cross Validation Set:", F1)
-    '''Visualizing the optimal threshold cv'''
-    plot_optimal_threshold(X_cv, epsilon, pval, title="Cross Validation")
-    '''Visualizing the optimal threshold test'''
-    pval = multivariate_gaussian(X_test, mu, sigma2)
-    plot_optimal_threshold(X_test, epsilon, pval, title="Test")
+    'get the data'
+    df = pd.read_csv(fr'{path_in}\{file_name}', index_col=[0], parse_dates=[0], dayfirst=True)
+    'fill missing values'
+    df.fillna(df.median(), inplace=True)
+    'select only numeric data'
+    df_num = df.select_dtypes(include=["float64", "int64"])
+    'visualize histogram'
+    df_num[df_num.columns.tolist()].hist(figsize=(15, 8))
+    plt.suptitle('Feature Histograms')
+    plt.tight_layout()
+    plt.show()
+    'select the subset of columns for which we detect outliers'
+    cols = df_num.columns.to_list()[1:4]
+    df_subset = df_num[cols]
+    'run isolate forest'
+    isolate_forest(df_subset, subplots_rows=1)
 
 
 if __name__ == '__main__':
     path_in = config_param_path_in()
-    file_name = r'\anomaly_detection\ex8data1.mat'
+    file_name = r'\anomaly_detection\Melbourne_housing_FULL.csv'
     main(path_in, file_name)
