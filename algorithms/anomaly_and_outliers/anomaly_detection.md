@@ -1,4 +1,4 @@
-#Anomaly / Outlier Detection
+#Anomaly Detection
 
 ###Uses: 
 Fraud, Manufacturing
@@ -17,8 +17,20 @@ Another way to evaluate the algorithm is to choose different values of epsilon, 
 In anomaly detection, often we have such a small number of positive examples that it is not possible for a learning algorithm to learn that much from the positive examples. So, we’ll use anomaly detection (and not Supervised Learning) and save the positive examples just for the cross validation set in the test set.
 
 ##Implementation 
-###Isolation Forest
-Describe the features histograms in the datasets:
+###1. 
+1. Split the data to train, cross-validation and test. save all anomalies to CV, test.
+2. Estimate parameters (mean and variance) for the Gaussian model only on the training data.
+3. For every sample compute its product of probability-density-functions over all the features. The low probability examples are more likely to be the anomalies in our dataset.
+4. Fined the best threshold (epsilon) using F-score in cross-validation.
 ![Screenshot](output/1.JPG)
-The Isolation Forest return the anomaly score of each sample. The IsolationForest 'isolates' observations by randomly selecting a feature and then randomly selecting a split value between the maximum and minimum values of the selected feature. The number of splittings required to isolate a sample is equivalent to the path length from the root node to the terminating node. This path length, averaged over a forest of such random trees, is a measure of normality. When a forest of random trees collectively produce shorter path lengths for particular samples, they are highly likely to be anomalies. We subtract self.offset_ to make 0 be the threshold value for being an outlier.
 ![Screenshot](output/2.JPG)
+![Screenshot](output/3.JPG)
+
+###2. Isolation Forest
+Describe the features histograms in the datasets:
+![Screenshot](output/4.JPG)
+The Isolation Forest return the anomaly score of each sample. The IsolationForest 'isolates' observations by randomly selecting a feature and then randomly selecting a split value between the maximum and minimum values of the selected feature. The number of splittings required to isolate a sample is equivalent to the path length from the root node to the terminating node. This path length, averaged over a forest of such random trees, is a measure of normality. When a forest of random trees collectively produce shorter path lengths for particular samples, they are highly likely to be anomalies. We subtract self.offset_ to make 0 be the threshold value for being an outlier.
+![Screenshot](output/5.JPG)
+
+Sources: [kaggle](https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate),
+[coursera](https://www.coursera.org/learn/machine-learning/programming/fyhXS/anomaly-detection-and-recommender-systems/instructions).
