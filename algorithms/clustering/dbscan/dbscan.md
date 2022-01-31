@@ -14,7 +14,13 @@ DBSCAN is a density models. Density models search the data space for areas of va
 data space. It isolates various different density regions and assign the data points within these regions in the same cluster.
 
 ##Implementation
-DBSCAN creates a circle of epsilon radius around every data point and classifies them into Core point, Border point, and Noise. A data point is a Core point if the circle around it contains at least ‘minPoints’ number of points. If the number of points is less than minPoints, then it is classified as Border Point, and if there are no other data points around any data point within epsilon radius, then it treated as Noise.
+###Algorithm:
+It groups ‘densely grouped’ data points into a single cluster.
+DBSCAN creates a circle of epsilon radius around every data point and classifies them into Core point, Border point, and Noise. 
+1. Core point - if the circle around it contains at least ‘min-points’ number of points.
+2. Border Point - if the number of points is less than ‘min-points’.
+3. Noise - if there are no other data points around any data point within epsilon radius.
+The figure shows us a cluster created by DBCAN with minPoints = 3
 ![Screenshot](output/1.JPG)
 Before optimizing the epsilon all the data points are labeled as noize.
 ![Screenshot](output/5.JPG)

@@ -22,9 +22,9 @@ def isolate_forest_simple(df):
 
 
 def isolate_forest(df, subplots_rows, subplots_columns):
-    fig, axs = plt.subplots(subplots_rows, subplots_columns, figsize=(22, 12), facecolor='w', edgecolor='k')
+    fig, axs = plt.subplots(subplots_rows, subplots_columns, figsize=(14, 8), facecolor='w', edgecolor='k')
     axs = axs.ravel()
-
+    fig.suptitle("Isolation Forest - Anomaly Score")
     cols = df.columns.tolist()
     outliers = {}
     anomalies_score = {}
@@ -44,6 +44,8 @@ def isolate_forest(df, subplots_rows, subplots_columns):
                             alpha=.4, label='outlier region')
         axs[i].legend()
         axs[i].set_title(column)
+    plt.tight_layout()
+    fig.tight_layout()
     plt.show()
     return outliers, anomalies_score
 
@@ -57,7 +59,8 @@ def main(path_in, file_name):
     'select only numeric data'
     df_num = df.select_dtypes(include=["float64", "int64"])
     'visualize histogram'
-    df_num[df_num.columns.tolist()].hist(figsize=(15, 10))
+    df_num[df_num.columns.tolist()].hist(figsize=(15, 8))
+    plt.suptitle('Feature Histograms')
     plt.tight_layout()
     plt.show()
 
