@@ -16,7 +16,7 @@ They are not able to form clusters based on varying densities. That’s why we n
 
 
 def points_in_circle(r, n=100):
-    '''Function for creating data points in the form of a circle'''
+    """Function for creating ring data points"""
     return [(math.cos(2*math.pi/n*x)*r+np.random.normal(-30, 30),
              math.sin(2*math.pi/n*x)*r+np.random.normal(-30, 30)) for x in range(1, n+1)]
 
@@ -49,12 +49,10 @@ def dbscan(df, **kwargs):
 
 
 def nearest_neighbors(df):
-    '''
-    The distance variable contains an array of distances between a data point and its nearest data point
-    for all data points in the dataset.
+    """
     :param df:
-    :return: distances
-    '''
+    :return: distances between a data point and its nearest data point for all data points in the dataset.
+    """
     neigh = NearestNeighbors(n_neighbors=2)
     neighbors = neigh.fit(df[[0, 1]])
     distances, indices = neighbors.kneighbors(df[[0, 1]])
@@ -62,12 +60,11 @@ def nearest_neighbors(df):
 
 
 def plot_k_distance(distances):
-    '''
-    optimize epsilon using the K-distance graph
+    """
+    plot the K-distance graph in order to optimize epsilon.
     :param distances: distance between a point and its nearest data point for all
     data points in the dataset using NearestNeighbors algorithm
-    :return: figure
-    '''
+    """
     distances = np.sort(distances, axis=0)
     distances = distances[:, 1]
     plt.figure(figsize=(20, 10))
@@ -80,36 +77,36 @@ def plot_k_distance(distances):
 
 def main():
     np.random.seed(42)
-    # Creating data points in the form of a circle
+    '''Creating ring data points'''
     df = pd.DataFrame(points_in_circle(500, 1000))
     df = df.append(points_in_circle(300, 700))
     df = df.append(points_in_circle(100, 300))
-    # Adding noise to the dataset
+    '''Adding samples out of the rings ("noise")'''
     df = df.append([(np.random.randint(-600, 600), np.random.randint(-600, 600)) for i in range(300)])
-    # visualize
+    '''visualize'''
     plot_the_data(df, 'Dataset', color='grey')
     '''K-Means vs. Hierarchical vs. DBSCAN Clustering'''
     color_pallet = ['purple', 'red', 'blue', 'green']
-    # K-means fails to cluster the data points into four clusters. Also, it did not work well with noise.
+    '''K-means fails to cluster the data points into four clusters.'''
     k_means_cluster(df)
     plot_the_data(df, 'K-Means Clustering', c=df['KMeans_labels'], cmap=matplotlib.colors.ListedColormap(color_pallet))
 
-    # The hierarchical clustering algorithm also failed to cluster the data points properly.
+    '''The hierarchical clustering algorithm also fails to cluster the data points properly.'''
     hierarchical_clustering(df)
     plot_the_data(df, 'Hierarchical Clustering', c=df['HR_labels'], cmap=matplotlib.colors.ListedColormap(color_pallet))
 
-    # DBSCAN defaults: epsilon is 0.5, and min_samples or minPoints is 5.
+    '''DBSCAN defaults: epsilon is 0.5, and min_samples or minPoints is 5.'''
     dbscan(df)
-    plot_the_data(df, 'DBSCAN Clustering\n(before optimizing the epsilon parameter)', c=df['DBSCAN_labels'], cmap=matplotlib.colors.ListedColormap(color_pallet))
-    '''All the data points are treated as noise. It is because the value of epsilon is very small.
-    Lets optimize epsilon and minPoints and then train our model again.'''
-    # optimize epsilon using the K-distance graph
-    '''For plotting a K-distance Graph, we need the distance between a point and its nearest data point for all 
-    data points in the dataset using NearestNeighbors algorithm.
-    The optimum value of epsilon is at the point of maximum curvature in the K-Distance Graph, which is 30 in this case.
-    '''
+    plot_the_data(df, 'DBSCAN Clustering\n(before optimizing the epsilon parameter)', c=df['DBSCAN_labels'],
+                  cmap=matplotlib.colors.ListedColormap(color_pallet))
+    '''All the data points are treated as noise. It is because the value of epsilon is very small.'''
+
+    '''optimize epsilon using the K-distance graph- in order to plot a K-distance Graph, we need the distance between
+     a point and its nearest data point for all data points in the dataset. We use the NearestNeighbors algorithm for
+     that purpose.'''
     distances = nearest_neighbors(df)
-    plot_k_distance(distances)
+    '''The optimum value of epsilon is at the point of maximum curvature in the K-Distance Graph, 
+    which is 30 in this case.'''
     plot_k_distance(distances)
     ''' The value of minPoints depends on domain knowledge'''
     dbscan(df, eps=30, min_samples=6)
