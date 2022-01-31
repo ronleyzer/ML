@@ -21,7 +21,7 @@ In anomaly detection, often we have such a small number of positive examples tha
 1. Split the data to train, cross-validation and test. save all anomalies to CV, test.
 2. Estimate parameters (mean and variance) for the Gaussian model only on the training data.
 3. For every sample compute its product of probability-density-functions over all the features. The low probability examples are more likely to be the anomalies in our dataset.
-4. Fined the best threshold (epsilon) using F-score in cross-validation.
+4. Find the best threshold (epsilon) using F-score in cross-validation.
 ![Screenshot](output/1.JPG)
 ![Screenshot](output/2.JPG)
 ![Screenshot](output/3.JPG)

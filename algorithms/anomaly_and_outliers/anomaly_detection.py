@@ -8,7 +8,7 @@ from scipy.io import loadmat
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
-''' this code is base on Androw Ng ML curs on Coursera 
+''' the code is based on Andrew Ng's ML course on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
 https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anomaly-detection-1233d23dba95
 '''
@@ -56,6 +56,16 @@ def multivariate_gaussian(X, mu, sigma2):
     return p
 
 
+def calc_proportion(nominator, additional_denominator):
+    """return the nominator's proportion in nominator + additional_denominator
+    in order to calculate precision and recall"""
+    if nominator + additional_denominator == 0:
+        proportion = 0
+    else:
+        proportion = nominator / (nominator + additional_denominator)
+    return proportion
+
+
 def select_threshold(yval, pval):
     """
     Find the best threshold (epsilon) to use for selecting outliers
@@ -63,8 +73,9 @@ def select_threshold(yval, pval):
     best_epi = 0
     best_F1 = 0
 
-    stepsize = (max(pval) - min(pval)) / 1000
-    epi_range = np.arange(pval.min(), pval.max(), stepsize)
+    step_size = (max(pval) - min(pval)) / 1000
+    epi_range = np.arange(pval.min(), pval.max(), step_size)
+    '''iteratively search for the best epsilon with respect to the F-score'''
     for epi in epi_range:
         '''true positive. false positive, false negative'''
         '''the label y = 1 corresponds to an anomalous example, and y = 0 corresponds to a normal example'''
@@ -73,21 +84,15 @@ def select_threshold(yval, pval):
         fp = np.sum(predictions[yval == 0] == 1)
         fn = np.sum(predictions[yval == 1] == 0)
 
-        # compute precision, recall and F1
-        if tp+fp == 0:
-            prec = 0
-        else:
-            prec = tp / (tp + fp)
-        if tp+fn == 0:
-            rec = 0
-        else:
-            rec = tp / (tp + fn)
+        '''compute precision, recall and F1'''
+        prec = calc_proportion(tp, fp)
+        rec = calc_proportion(tp, fn)
 
         if prec+rec == 0:
             F1 = 0
         else:
             F1 = (2 * prec * rec) / (prec + rec)
-
+        '''update best_F1 and best_epi if the F-score improves'''
         if F1 > best_F1:
             best_F1 = F1
             best_epi = epi
@@ -97,7 +102,6 @@ def select_threshold(yval, pval):
 
 def plot_optimal_threshold(X, epsilon, p, title):
     plt.figure(figsize=(8, 6))
-    # plot the data
     plt.scatter(X[:, 0], X[:, 1], marker="x")
     outliers = np.nonzero(p < epsilon)[0]
     plt.scatter(X[outliers, 0], X[outliers, 1], marker="o", facecolor="none", edgecolor="r", s=70)
@@ -159,15 +163,15 @@ def main(path_in, file_name):
     '''for every sample compute its product of probability-density-functions over all the features 
     The low probability examples are more likely to be the anomalies in our dataset.'''
     pval = multivariate_gaussian(X_cv, mu, sigma2)
-    '''select threshold - One way to determine which
-        examples are anomalies is to select the threshold ε using the F1 score on a cross validation set.'''
+    '''find the best threshold (epsilon) using F-score in cross-validation.'''
     epsilon, F1 = select_threshold(y_cv, pval)
     print("Best epsilon found using cross-validation:", epsilon)
     print("Best F1 on Cross Validation Set:", F1)
     '''Visualizing the optimal threshold cv'''
     plot_optimal_threshold(X_cv, epsilon, pval, title="Cross Validation")
-    '''Visualizing the optimal threshold test'''
+    '''compute the probabilities for the test sample'''
     pval = multivariate_gaussian(X_test, mu, sigma2)
+    '''Visualizing the optimal threshold test'''
     plot_optimal_threshold(X_test, epsilon, pval, title="Test")
 
 
