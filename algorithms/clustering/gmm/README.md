@@ -7,7 +7,9 @@ A Gaussian mixture model involves the mixture of multiple Gaussian distributions
 I used a dataset that contains 4 features, reflecting the size and shape of leaves of the Iris flower (sepal length, 
 sepal width, petal length and petal width). After standardizing, normalizing and reduction of the dimensions (PCA), 
 the visualization is as follows:
-![Screenshot](output/1.JPG)
+
+<img src=output/1.JPG width="600" height="400">
+
 The motivation is to figure out if the dataset contains different types of Iris, without knowing how 
 many types there are. To select the best number of clusters I used 
 [Silhouette score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html).
@@ -16,11 +18,15 @@ using the mean intra-cluster distance (a) and the mean nearest-cluster distance 
 The Silhouette Coefficient for a sample is (b - a) / max(a, b). To clarify, b is the distance between a sample and the 
 nearest cluster that the sample is not a part of. To create the figure, I ran a GMM model for each number of clusters 
 and calculated the Silhouette score.
-![Screenshot](output/2.JPG)
+
+<img src=output/2.JPG width="600" height="400">
+
 The closer the Silhouette score is to one, the better the clustering is. Therefore, we can see that 3 clusters fit the 
 data best. I created a GMM model with 3 clusters and predicted the label of each sample. We can see that there are 
 samples that are harder to label.
-![Screenshot](output/3.JPG)![Screenshot](output/4.JPG)
+
+<img src=output/3.JPG width="600" height="400">
+<img src=output/4.JPG width="600" height="400">
 
 NOTE: it is possible to split the data to train and test and check if the normal distributions of each cluster are 
 similar, using Jensen-Shannon (checks the similarity between two distributions. The lower the JS-distance is, the better 
