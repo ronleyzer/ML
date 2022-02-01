@@ -17,7 +17,7 @@ I chose the parameter of the AR using the Autocorrelation. The plot suggest that
 A similar method is used to select the MA parameter.
 ![Screenshot](output/3.JPG)
 
-Using the validation, I tested a few option as parameter candidates for AR and MA using the significant option from the Autocorrelation plot.
+Using the validation, I tested a few options as parameter candidates for AR and MA using the significant option from the Autocorrelation plot.
 The prediction is for all the validation period. 
 ![Screenshot](output/4.JPG)
 ![Screenshot](output/5.JPG)
@@ -25,8 +25,10 @@ The prediction is for all the validation period.
 ![Screenshot](output/7.JPG)
 
 The last model (AR=3, target-diff=1, MA=1) has the best fit to the validation period. Now it is possible to check the model on the test period.
-Another recommended test is to plot the residuals to ensure that the mean is near zero and the variance is uniform.
 ![Screenshot](output/8.JPG)
+Another recommended test is to plot the residuals to ensure that the mean is near zero and the variance is uniform.
+![Screenshot](output/9.JPG)
+
 
 Sources: [machinelearningplus](https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/), 
 [machinelearningmastery](https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/), 

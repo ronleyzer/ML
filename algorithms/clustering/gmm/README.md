@@ -8,8 +8,8 @@ I used a dataset that contains 4 features, reflecting the size and shape of leav
 sepal width, petal length and petal width). After standardizing, normalizing and reduction of the dimensions (PCA), 
 the visualization is as follows:
 ![Screenshot](output/1.JPG)
-The motivation is to figure out if the data set contains different types of Iris, without knowing if there are or how 
-many. To select the best number of clusters I used 
+The motivation is to figure out if the dataset contains different types of Iris, without knowing how 
+many types there are. To select the best number of clusters I used 
 [Silhouette score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html).
 Silhouette score checks how much the clusters are compact and well separated. The Silhouette coefficient is calculated 
 using the mean intra-cluster distance (a) and the mean nearest-cluster distance (b) for each sample. 
