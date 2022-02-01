@@ -7,7 +7,7 @@ The order of the AR and MA is based on the Auto Correlation Function (ACF) - the
 ## Implementation
 I got a series with 100 samples. I split it to train (60%) validation (20%) and test.
 My target series is non-stationary (I used adfuller test, P-val = 0.101).
-<img src=output/1.JPG width="400" height="200">
+<img src=output/1.JPG width="800" height="400">
 ![Screenshot](output/1.JPG)
 
 To select the order of difference I plotted the first and second orders, checked the change in adfuller P-value and the Autocorrelations.
