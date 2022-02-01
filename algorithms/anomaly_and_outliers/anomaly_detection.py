@@ -4,12 +4,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-import scipy
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
-''' this code is base on Androw Neg ML curs on Coursera 
+''' the code is based on Andrew Ng's ML course on Coursera 
 https://www.coursera.org/learn/machine-learning/lecture/Mwrni/developing-and-evaluating-an-anomaly-detection-system
 https://towardsdatascience.com/andrew-ngs-machine-learning-course-in-python-anomaly-detection-1233d23dba95
 '''
@@ -22,12 +21,14 @@ def get_the_data(path_in, file_name):
     return X, yval, mat
 
 
-def plot_the_data(X):
+def plot_the_data(X, title):
     plt.scatter(X[:, 0], X[:, 1], marker="x")
     plt.xlim(0, 30)
     plt.ylim(0, 30)
     plt.xlabel("Latency (ms)")
     plt.ylabel("Throughput (mb/s)")
+    plt.title(f'{title}')
+    plt.grid()
     plt.show()
 
 
@@ -36,11 +37,10 @@ def estimate_gaussian(X):
      This function estimates the parameters of a Gaussian distribution using the data in X
     """
     m = X.shape[0]
-    # compute the mean for each feature
-    sum_ = np.sum(X, axis=0)
-    mu = 1 / m * sum_
-    # compute the variances for each feature
-    var = 1 / m * np.sum((X - mu) ** 2, axis=0)
+    '''compute the mean for each feature'''
+    mu = (1 / m) * np.sum(X, axis=0)
+    '''compute the variances for each feature'''
+    var = (1 / m) * np.sum((X - mu) ** 2, axis=0)
     return mu, var
 
 
@@ -56,6 +56,16 @@ def multivariate_gaussian(X, mu, sigma2):
     return p
 
 
+def calc_proportion(nominator, additional_denominator):
+    """return the nominator's proportion in nominator + additional_denominator
+    in order to calculate precision and recall"""
+    if nominator + additional_denominator == 0:
+        proportion = 0
+    else:
+        proportion = nominator / (nominator + additional_denominator)
+    return proportion
+
+
 def select_threshold(yval, pval):
     """
     Find the best threshold (epsilon) to use for selecting outliers
@@ -63,8 +73,9 @@ def select_threshold(yval, pval):
     best_epi = 0
     best_F1 = 0
 
-    stepsize = (max(pval) - min(pval)) / 1000
-    epi_range = np.arange(pval.min(), pval.max(), stepsize)
+    step_size = (max(pval) - min(pval)) / 1000
+    epi_range = np.arange(pval.min(), pval.max(), step_size)
+    '''iteratively search for the best epsilon with respect to the F-score'''
     for epi in epi_range:
         '''true positive. false positive, false negative'''
         '''the label y = 1 corresponds to an anomalous example, and y = 0 corresponds to a normal example'''
@@ -73,21 +84,15 @@ def select_threshold(yval, pval):
         fp = np.sum(predictions[yval == 0] == 1)
         fn = np.sum(predictions[yval == 1] == 0)
 
-        # compute precision, recall and F1
-        if tp+fp == 0:
-            prec = 0
-        else:
-            prec = tp / (tp + fp)
-        if tp+fn == 0:
-            rec = 0
-        else:
-            rec = tp / (tp + fn)
+        '''compute precision, recall and F1'''
+        prec = calc_proportion(tp, fp)
+        rec = calc_proportion(tp, fn)
 
         if prec+rec == 0:
             F1 = 0
         else:
             F1 = (2 * prec * rec) / (prec + rec)
-
+        '''update best_F1 and best_epi if the F-score improves'''
         if F1 > best_F1:
             best_F1 = F1
             best_epi = epi
@@ -97,7 +102,6 @@ def select_threshold(yval, pval):
 
 def plot_optimal_threshold(X, epsilon, p, title):
     plt.figure(figsize=(8, 6))
-    # plot the data
     plt.scatter(X[:, 0], X[:, 1], marker="x")
     outliers = np.nonzero(p < epsilon)[0]
     plt.scatter(X[outliers, 0], X[outliers, 1], marker="o", facecolor="none", edgecolor="r", s=70)
@@ -106,32 +110,33 @@ def plot_optimal_threshold(X, epsilon, p, title):
     plt.xlabel("Latency (ms)")
     plt.ylabel("Throughput (mb/s)")
     plt.title(f"{title}")
+    plt.grid()
     plt.show()
 
 
 def split_train_cv_test_normal_and_anomaly(mat):
-    '''
-    this function take ndarray of the data, split to normal and non-normal and split the data so
-    that train gets 60% of the normal samples, cv and test each gets 20% of normals, and 50% of anomaly samples
+    """
+    this function takes an ndarray of the data, splits the labels to normal and non-normal, and splits the data so
+    that the training sample gets 60% of the normal samples, and cv and test get 20% of normals,
+    and 50% of the anomaly samples
     :param mat: dict data with target
-    :return:
-    '''
+    :return: split data samples: X_train, X_cv, X_test, y_train, y_cv, y_test
+    """
 
+    '''create a feature dataset and a label dataset'''
     X = mat["Xval"]
     y = mat["yval"]
-
+    '''distinguish normal and anomaly samples'''
     normal = np.squeeze(mat["yval"] == 0)
     anomaly = np.squeeze(mat["yval"] == 1)
-
     X_normal = X[normal]
     X_anomaly = X[anomaly]
     y_normal = y[normal]
     y_anomaly = y[anomaly]
-
+    '''randomly split the samples of normal and anomaly between training CV and test'''
     np.random.seed(111)
     uniform_dis_normal = (np.random.uniform(size=len(X_normal)))[:, np.newaxis]
     uniform_dis_anomaly = (np.random.uniform(size=len(X_anomaly)))[:, np.newaxis]
-
     X_train = X_normal[np.squeeze(uniform_dis_normal <= 0.6)]
     X_cv = np.append(X_normal[np.squeeze((uniform_dis_normal > 0.6) & (uniform_dis_normal <= 0.8))],
                      X_anomaly[np.squeeze(uniform_dis_anomaly <= 0.5)], axis=0)
@@ -148,31 +153,29 @@ def split_train_cv_test_normal_and_anomaly(mat):
 
 
 def main(path_in, file_name):
+    '''get the data'''
     X, yval, mat = get_the_data(path_in, file_name)
-    plot_the_data(X)
-    '''split the data to train, cross-validation and test. save all anomalies to CV, test'''
+    plot_the_data(X, 'The Data')
+    '''split the data to train, cross-validation and test. save all anomalies to cross validation and test periods'''
     X_train, X_cv, X_test, y_train, y_cv, y_test = split_train_cv_test_normal_and_anomaly(mat)
-    '''estimate parameters (mean and variance) for the Gaussian model'''
+    '''estimate parameters (mean and variance) for the Gaussian model for training only'''
     mu, sigma2 = estimate_gaussian(X_train)
-    '''Now that you have estimated the Gaussian parameters, you can investigate
-       which examples have a very high probability given this distribution and which
-       examples have a very low probability.'''
     '''for every sample compute its product of probability-density-functions over all the features 
     The low probability examples are more likely to be the anomalies in our dataset.'''
     pval = multivariate_gaussian(X_cv, mu, sigma2)
-    '''select threshold - One way to determine which
-        examples are anomalies is to select the threshold ε using the F1 score on a cross validation set.'''
+    '''find the best threshold (epsilon) using F-score in cross-validation.'''
     epsilon, F1 = select_threshold(y_cv, pval)
     print("Best epsilon found using cross-validation:", epsilon)
     print("Best F1 on Cross Validation Set:", F1)
     '''Visualizing the optimal threshold cv'''
-    plot_optimal_threshold(X_cv, epsilon, pval, title="cv")
-    '''Visualizing the optimal threshold test'''
+    plot_optimal_threshold(X_cv, epsilon, pval, title="Cross Validation")
+    '''compute the probabilities for the test sample'''
     pval = multivariate_gaussian(X_test, mu, sigma2)
-    plot_optimal_threshold(X_test, epsilon, pval, title="test")
+    '''Visualizing the optimal threshold test'''
+    plot_optimal_threshold(X_test, epsilon, pval, title="Test")
 
 
 if __name__ == '__main__':
     path_in = config_param_path_in()
-    file_name = r'\anomaly_detection\ex8data1.mat'
+    file_name = r'\ex8data1.mat'
     main(path_in, file_name)

@@ -1,10 +1,10 @@
 # ML
-
-Machine Learning Algorithms Implementation Project.
-
+###Machine Learning Algorithms Implementation Project.
+This project present a few ML algorithms I implemented.
+The motivation to this project is self learning and dipper understanding of the algorithms,
+as part of professional development. Each algorithm have a unique text file that explains 
 
 ## Download the Data from GoogleDrive
-
 Download the 'data' folder using the following link: [My_GoogleDrive](https://drive.google.com/drive/folders/1pohCzjaTY1ZTzqvKXm8KPB2pC6BEuovB).
 Put the data in a folder on your computer.
 
@@ -41,3 +41,11 @@ Second option - Run the code using the configuration:
 --path_in "C:\Users\ronro\Desktop\data"
 # Then press Run
 ```
+
+###Path to Optional Codes in this Project
+1. \ML\algorithms\anomaly_and_outliers\anomaly_detection.py
+2. \ML\algorithms\anomaly_and_outliers\anomaly_detection_isolation_forest.py
+3. \ML\algorithms\clustering\dbscan\dbscan.py
+4. \ML\algorithms\clustering\gmm\gmm_gaussian_mixture_model.py
+5. \ML\algorithms\time_series\arima\arima.py
+6. \ML\algorithms\time_series\holt_winters\holt_winters.py
