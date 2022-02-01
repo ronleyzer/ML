@@ -2,7 +2,7 @@
 ###Machine Learning Algorithms Implementation Project.
 This project present a few ML algorithms I implemented.
 The motivation to this project is self learning and dipper understanding of the algorithms,
-as part of professional development.
+as part of professional development. Each algorithm have a unieqe text file that explains 
 
 ## Download the Data from GoogleDrive
 Download the 'data' folder using the following link: [My_GoogleDrive](https://drive.google.com/drive/folders/1pohCzjaTY1ZTzqvKXm8KPB2pC6BEuovB).
@@ -41,3 +41,8 @@ Second option - Run the code using the configuration:
 --path_in "C:\Users\ronro\Desktop\data"
 # Then press Run
 ```
+
+###Path to Optional Codes in this Project
+1. C:\Users\ronro\PycharmProjects\ML\algorithms\anomaly_and_outliers\anomaly_detection.py
+2. C:\Users\ronro\PycharmProjects\ML\algorithms\anomaly_and_outliers\anomaly_detection_isolation_forest.py
+3. 

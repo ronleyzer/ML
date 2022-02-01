@@ -82,5 +82,5 @@ def main(path_in, file_name):
 
 if __name__ == '__main__':
     path_in = config_param_path_in()
-    file_name = r'\anomaly_detection\Melbourne_housing_FULL.csv'
+    file_name = r'\Melbourne_housing_FULL.csv'
     main(path_in, file_name)

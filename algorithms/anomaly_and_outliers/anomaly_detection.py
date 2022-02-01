@@ -177,5 +177,5 @@ def main(path_in, file_name):
 
 if __name__ == '__main__':
     path_in = config_param_path_in()
-    file_name = r'\anomaly_detection\ex8data1.mat'
+    file_name = r'\ex8data1.mat'
     main(path_in, file_name)
