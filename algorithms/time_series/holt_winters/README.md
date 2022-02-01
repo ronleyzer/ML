@@ -1,5 +1,5 @@
 # Holt-Winters Exponential Smoothening (HWES)
-Holt-Winters Exponential Smoothening (HWES) is a method that exponentially smooths time series data, by separating the data to 3 components, and exponentially smoothing each component separately. Single HWEL captures the series level, Double HWES considers data with trends and Triple HWES can even handle Seasonality.
+Holt-Winters Exponential Smoothening (HWES) is a method that exponentially smooths time series data, by separating the data to 3 components, and exponentially smoothing each component separately. Single HWES captures the series level, Double HWES considers data with trends and Triple HWES can even handle Seasonality.
 
 ## Disadvantages:
 Holt-Winters forecasting cannot handle Time Series data with irregular patterns well.
@@ -16,14 +16,14 @@ Since I know the series has levels, trends, and seasonality I can immediately im
 ![Screenshot](output/3.JPG)
 
 As expected, it didn’t fit quite well, because single Exponential Smoothing doesn’t work for data with trends and Seasonality.
+Double Exponential Smoothing:
 ![Screenshot](output/4.JPG)
 
-Double Exponential Smoothing:
-![Screenshot](output/5.JPG)
 The fit looks better, but since I know there is seasonality, I shall try the Triple Exponential Smoothing:
-![Screenshot](output/6.JPG)
+![Screenshot](output/5.JPG)
 
 Forecasting:
+![Screenshot](output/6.JPG)
 ![Screenshot](output/7.JPG)
 
 Source: [medium](https://medium.com/analytics-vidhya/python-code-on-holt-winters-forecasting-3843808a9873),

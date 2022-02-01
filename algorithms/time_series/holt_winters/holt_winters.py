@@ -1,6 +1,11 @@
 import os
 import sys
 
+import warnings
+# warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings("ignore")
+# warnings.filterwarnings("error")
+# warnings.simplefilter(action='ignore')
 import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -11,6 +16,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
+
 
 '''
 This code is an implementation of Holt-Winters forecasting
@@ -76,17 +82,17 @@ def main(path_in, file_name):
     Double HWES can as well consider data with trends and Triple HWES can even handle Seasonality.'''
 
     '''Single Exponential Smoothing'''
-    airline['HWES1'] = SimpleExpSmoothing(airline['Thousands of Passengers']).fit(smoothing_level=alpha,
-                                                                                  optimized=False,
-                                                                                  use_brute=True).fittedvalues
+    airline['HWES1'] = ExponentialSmoothing(airline['Thousands of Passengers'], freq="MS").fit(smoothing_level=alpha,
+                                                                                               optimized=False,
+                                                                                               use_brute=True).fittedvalues
     airline[['Thousands of Passengers', 'HWES1']].plot(title='Holt Winters Single Exponential Smoothing')
     plt.grid()
     plt.show()
     '''As expected, it didn’t fit quite well, because single ES doesn't work for data with Trends and Seasonality.'''
 
     '''Double Exponential Smoothing'''
-    airline['HWES2_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add').fit().fittedvalues
-    airline['HWES2_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul').fit().fittedvalues
+    airline['HWES2_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add', freq="MS").fit().fittedvalues
+    airline['HWES2_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul', freq="MS").fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES2_ADD', 'HWES2_MUL']].plot(
         title='Holt Winters Double Exponential Smoothing: Additive and Multiplicative Trend')
     plt.grid()
@@ -95,9 +101,9 @@ def main(path_in, file_name):
 
     '''Triple Exponential Smoothing'''
     airline['HWES3_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add', seasonal='add',
-                                                seasonal_periods=12).fit().fittedvalues
+                                                seasonal_periods=12, freq="MS").fit().fittedvalues
     airline['HWES3_MUL'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='mul', seasonal='mul',
-                                                seasonal_periods=12).fit().fittedvalues
+                                                seasonal_periods=12, freq="MS").fit().fittedvalues
     airline[['Thousands of Passengers', 'HWES3_ADD', 'HWES3_MUL']].plot(
         title='Holt Winters Triple Exponential Smoothing: Additive and Multiplicative Seasonality')
     plt.grid()
@@ -110,7 +116,7 @@ def main(path_in, file_name):
     train_airline, validation_airline, test_airline = split_time_series_to_train_validation_test(airline, split_pct)
 
     fitted_model = ExponentialSmoothing(train_airline['Thousands of Passengers'], trend='mul', seasonal='mul',
-                                        seasonal_periods=12).fit()
+                                        seasonal_periods=12, freq="MS").fit()
     test_predictions = fitted_model.forecast(len(test_airline))
     '''add the first sample in the prediction to the last in the train so there is no gap in the plot'''
     train_airline_last = pd.DataFrame(test_airline.iloc[0, :])
@@ -125,7 +131,7 @@ def main(path_in, file_name):
 
     '''plot predict'''
     test_airline[['Thousands of Passengers']].plot(legend=True, label='TEST', figsize=(9, 6))
-    test_predictions.plot(title='Test Period',legend=True, label='PREDICTION')
+    test_predictions.plot(title='Test Period', legend=True, label='PREDICTION')
     plt.grid()
     plt.show()
 

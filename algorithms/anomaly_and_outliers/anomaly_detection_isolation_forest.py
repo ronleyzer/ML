@@ -8,6 +8,9 @@ from sklearn.ensemble import IsolationForest
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 '''the code is based on https://www.kaggle.com/kevinarvai/outlier-detection-practice-uni-multivariate'''
 
