@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.neighbors import NearestNeighbors
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 '''
 the code is based on

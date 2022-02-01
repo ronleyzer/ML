@@ -4,9 +4,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in

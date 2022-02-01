@@ -1,10 +1,10 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-from statsmodels.tsa.stattools import adfuller
-from numpy import log
-import numpy as np, pandas as pd
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
 from pandas.plotting import autocorrelation_plot
 plt.rcParams.update({'figure.figsize': (9, 7), 'figure.dpi': 120})
@@ -166,7 +166,7 @@ def main():
     model_fit = arima_model(ts, order=(1, 1, 2))
     print('''\nNotice that the coefficient of the MA2 term is close to zero and the P-Value in the ‘P>|z|’ 
     column is highly insignificant. It should ideally be less than 0.05 for the respective X to be significant.
-    So, let’s rebuild the model without the MA2 term.\n''')
+    Let’s rebuild the model without the MA2 term.\n''')
     print(model_fit.summary())
     order = (1, 1, 1)
     model_fit = arima_model(ts, order=order)

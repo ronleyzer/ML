@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 import numpy as np
-from sklearn.datasets import make_blobs
 from sklearn.mixture import GaussianMixture as GMM
 from matplotlib.patches import Ellipse
 import pandas as pd
