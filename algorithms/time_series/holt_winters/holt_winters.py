@@ -12,10 +12,16 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 sys.path.append(os.getcwd())
 from generic_fun.get_data import config_param_path_in
 
+'''
+This code is an implementation of Holt-Winters forecasting
+sources: https://medium.com/analytics-vidhya/python-code-on-holt-winters-forecasting-3843808a9873
+        https://medium.com/analytics-vidhya/holt-winters-forecasting-13c2e60d983f
+'''
+
 
 def background():
     print('''Holt-Winters Exponential Smoothening (HWES) works on the idea of smoothening the values of a\n
-             Univariate Time Series Analysis to use them for forecasting future values.\n
+             Univariate Time Series, to use them for forecasting future values.\n
              The idea is to assign exponentially decreasing weights giving more importance to more recent incidents.\n
              So, when we move back in time, we would see diminishing weights.\n\n
              
@@ -28,21 +34,15 @@ def background():
              Trend is a vector, as it has both magnitude and direction.\n\n
              
              Seasonality-\n
-             Certain patterns that periodically repeated.
+             Certain patterns that are periodically repeated.
              
              Disadvantages:
-             Holt-Winters forecasting cannot handle Time Series data with irregular patterns well.
+             Holt-Winters forecasting cannot handle Time Series data with irregular patterns.
              HWES is a Univariate Forecasting technique and works with Stationary Time Series data.
              ''')
 
 
 def main(path_in, file_name):
-    '''
-    This code is an implementation of Holt-Winters forecasting
-    sources: https://medium.com/analytics-vidhya/python-code-on-holt-winters-forecasting-3843808a9873
-            https://medium.com/analytics-vidhya/holt-winters-forecasting-13c2e60d983f
-    '''
-
     background()
     '''get the data'''
     airline = pd.read_csv(fr'{path_in}\{file_name}', index_col='Month', parse_dates=True)
@@ -55,18 +55,18 @@ def main(path_in, file_name):
 
     '''decomposing the Time Series
     Look for: Levels, Trends and Seasonality in the data'''
-    # check nan
+    '''check nan'''
     missing_values_count = airline.isnull().sum(0).sort_values(ascending=False)
+    print(missing_values_count)
 
-    # decompose
+    '''decompose'''
     decompose_result = seasonal_decompose(airline['Thousands of Passengers'], model='multiplicative')
     decompose_result.plot()
     plt.show()
-    '''We can quite clearly see that the data has all 3, Levels, Trends, Seasonality.'''
+    '''We can see that the data has all 3 components: Levels, Trends, Seasonality.'''
 
     '''Define the weight coefficient Alpha and the Time Period, 
     and set the DateTime frequency to a monthly level (m = Time Period).'''
-    # airline.index.freq = 'MS'
     m = 12
     alpha = 1 / (2 * m)
 
@@ -82,7 +82,7 @@ def main(path_in, file_name):
     airline[['Thousands of Passengers', 'HWES1']].plot(title='Holt Winters Single Exponential Smoothing')
     plt.grid()
     plt.show()
-    '''As expected, it didn’t fit quite well, because single ES doesnt work for data with Trends and Seasonality.'''
+    '''As expected, it didn’t fit quite well, because single ES doesn't work for data with Trends and Seasonality.'''
 
     '''Double Exponential Smoothing'''
     airline['HWES2_ADD'] = ExponentialSmoothing(airline['Thousands of Passengers'], trend='add').fit().fittedvalues
@@ -102,7 +102,7 @@ def main(path_in, file_name):
         title='Holt Winters Triple Exponential Smoothing: Additive and Multiplicative Seasonality')
     plt.grid()
     plt.show()
-    '''looks promising!'''
+    '''looks good!'''
 
     '''Forecasting with Holt-Winters Exponential Smoothing'''
     '''split the data to train and test'''
@@ -112,7 +112,7 @@ def main(path_in, file_name):
     fitted_model = ExponentialSmoothing(train_airline['Thousands of Passengers'], trend='mul', seasonal='mul',
                                         seasonal_periods=12).fit()
     test_predictions = fitted_model.forecast(len(test_airline))
-    # add the first sample in the prediction to the last in the train so there won't be a gap in the plot
+    '''add the first sample in the prediction to the last in the train so there is no gap in the plot'''
     train_airline_last = pd.DataFrame(test_airline.iloc[0, :])
     frames = [train_airline, train_airline_last.T]
     train_airline_1 = pd.concat(frames)
